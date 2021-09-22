@@ -10,16 +10,16 @@ ifndef CUDA_TOOLKIT_ROOT_DIR
 endif
 
 k80: matrix_multiply.c
-	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_37 matrix_multiply.c -o matrix_multiply_k80.out
+	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_37 matrix_multiply.c -o matrix_multiply_clang_k80.out
 
 p100: matrix_multiply.c
-	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_60 matrix_multiply.c -o matrix_multiply_p100.out
+	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_60 matrix_multiply.c -o matrix_multiply_clang_p100.out
 
 v100: matrix_multiply.c
-	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_70 matrix_multiply.c -o matrix_multiply_v100.out
+	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_70 matrix_multiply.c -o matrix_multiply_clang_v100.out
 
 rtx: matrix_multiply.c
-	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_75 matrix_multiply.c -o matrix_multiply_rtx.out
+	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_75 matrix_multiply.c -o matrix_multiply_clang_rtx.out
 
 clean:
-	$(RM) matrix_multiply*.out
+	$(RM) matrix_multiply_clang_*.out
