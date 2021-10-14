@@ -1,6 +1,6 @@
 import pandas as pd
 import torch
-from torch.utils.data import Dataset, Dataloader
+from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler as std_scaler
 
 class CompData(Dataset):

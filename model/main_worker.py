@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-import arparse
+import argparse
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import sys
@@ -13,7 +13,7 @@ parser.add_argument('--batch_tr', type=int, default=32,\
         help=" [option] meta train batch size for each task model")
 parser.add_argument('--batch_te', type=int, default=32,\
         help=" [option] meta test batch size for each task model")
-parser.add_argument('--train_test_split', type=float, default=0.6,\
+parser.add_argument('--train_eval_split', type=float, default=0.6,\
         help=" [option] split data into train and test sets")
 parser.add_argument('--task_num', type=int, default=3,\
         help=" [option] number of task models")
@@ -32,7 +32,8 @@ parser.add_argument('--dataset_root', type=str, \
         help=" [option] path to dataset root directory")
 parser.add_argument('--split_seed', type=int, default=43,\
         help=" [option] train-test split seed (can be used fpr reproducibility)")
-#parser.add_argument('')
+parser.add_argument('--shuffle', action='store_true',\
+        help=" [option] shuffle dataset")
 
 
 def train():
@@ -50,7 +51,7 @@ def test():
 def main():
     args = parser.parse_args()
     if not args.dataset_root:
-        sys.exit("Enter pat to dataset root directory")
+        sys.exit("Enter path to dataset root directory")
 
     print('<script option> ',args)
     worker(args)
@@ -66,7 +67,7 @@ def worker():
 
     if args.app == "matrix_multiplication":
         try:
-            df = pd.read(args.dataset_root+"matrix_multiplication.csv")   
+            df = pd.read_csv(args.dataset_root+"matrix_multiplication.csv")   
             df = df.drop(columns=dr_columns)
         except:
             print('An error occured')
@@ -76,7 +77,7 @@ def worker():
     X = df.iloc[:, 0:-1]
     y = df.iloc[:, -1]
     
-    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=args.train_test_split, random_state=args.split_seed)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=args.train_test_split, random_state=args.split_seed, shuffle=args.shuffle)
     
     train_sets = CompData(X_train,y_train, train=True, meta_train_batch=args.batch_tr, meta_test_batch=args.batch_te)
     test_sets = CompData(X_test, y_test, train=False, test_batch=32)
