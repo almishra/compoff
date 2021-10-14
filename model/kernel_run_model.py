@@ -22,5 +22,5 @@ class KernelRunModel(torch.nn.Module):
         x += residual
         x = F.relu(self.hidden4(x))
         x = self.dropout(x)
-        x = F.tanh(self.op_run(x))
+        x = F.sigmoid(self.op_run(x))
         return x
