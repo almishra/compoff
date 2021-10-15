@@ -79,9 +79,11 @@ def worker():
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=args.train_test_split, random_state=args.split_seed, shuffle=args.shuffle)
     
-    train_sets = CompData(X_train,y_train, train=True, meta_train_batch=args.batch_tr, meta_test_batch=args.batch_te)
-    test_sets = CompData(X_test, y_test, train=False, test_batch=32)
-
+    train_sets = CompData(X_train,y_train, train=True, task_num=args.task_num, num_sets=1000, meta_train_batch=args.batch_tr, meta_test_batch=args.batch_te)
+    #train_loader = DataLoader(train_sets, batch_size=args.task_num)
+    #test_sets = CompData(X_test, y_test, train=False, test_batch=32)
+    
+    #create dataset class for testing/validation
 
 
 if __name__ == '__main__':
