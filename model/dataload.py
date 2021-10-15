@@ -51,9 +51,20 @@ class CompData(Dataset):
         test_rows_runtime = test_rows[:,num_features-1:]
         #create sets here:
         final_sets = [] ## list of list. each list row will have train_rows_data/runtime, test_data/runtime
-        for i in range(num_sets):
-            temp = [train_rows_data[i]]+[train_rows_runtime[i]]+[test_rows_data[i]]+[test_rows_runtime[i]]
+        for j in range(num_tasks):
+            tr_row_data = list()
+            tr_row_run = list()
+            te_row_data = list()
+            te_row_run - list()
+            for i in range(num_sets):
+                tr_row_data.append(train_rows_data[i])
+                tr_row_run.append(train_rows_runtime[i])
+                te_row_data.append(test_rows_data[i])
+                te_row_run.append(test_rows_runtime[i])
+
+            temp = [tr_row_data]+[tr_row_run]+[te_row_data]]+[te_row_run]
             final_sets.append(temp)
+            
         self.final_sets = final_sets
 
     def __len__(self):
@@ -62,17 +73,18 @@ class CompData(Dataset):
     def __getitem__(self,index):
 
         #zip sample without replacement from X
+        #for i in range(self.num_tasks):
+        train_row_data = self.final_sets[index,:,0]
+        train_row_runtime = self.final_sets[index,:,1]
+        test_row_data = self.final_sets[index,:,2]
+        test_row_runtime = self.final_set[index,:,3]
 
-        train_row_data = self.final_sets[index,0]
-        train_row_runtime = self.final_sets[index,1]
-        test_row_data = self.final_sets[index,2]
-        test_row_runtime = self.final_set[index,3]
-
-        if np.asarray(train_row_data) is train_row_data:
-            train_row_data = np.asarray(train_row_data)
-            train_row_runtime = np.asarray(train_row_runtime)
-            test_row_data = np.asarray(test_row_data)
-            test_row_runtime = np.asarray(test_row_runtime)
+        #for i in range(self.num_tasks):
+        #if np.asarray(train_row_data) is train_row_data:
+        train_row_data = np.asarray(train_row_data)
+        train_row_runtime = np.asarray(train_row_runtime)
+        test_row_data = np.asarray(test_row_data)
+        test_row_runtime = np.asarray(test_row_runtime)
 
         ## convert numpy array to torch tensor
         #if not torch.is_tensor(X):
