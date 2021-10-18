@@ -21,6 +21,10 @@ parser.add_argument('--lr', type=float, dafault=1e-3,\
         help=" [option] outer learning rate")
 parser.add_argument('--decay', type=float, default=0.0,\
         help=" [option] L2 penalty for outer optimization algorithm")
+parser.add_argument('--inner_epochs', type=int, default=1,\
+        help=" [option] number of epochs for inner loop optimization per task model")
+parser.add_argument('--epochs', type=int, default=20,\
+        help=" [options] number of epochs")
 #### Add support for learning rate decay
 #parser.add_argument('--lr_decay', type=float, default=0.95,\
 #        help=" [option] learning rate decay multiplicative factor" )
@@ -81,9 +85,12 @@ def worker():
     
     train_sets = CompData(X_train,y_train, train=True, task_num=args.task_num, num_sets=1000, meta_train_batch=args.batch_tr, meta_test_batch=args.batch_te)
     #train_loader = DataLoader(train_sets, batch_size=args.task_num)
+
+    # 1. write methods for inner loop? or add it to the train function
+
     #test_sets = CompData(X_test, y_test, train=False, test_batch=32)
     
-    #create dataset class for testing/validation
+    # 2. create dataset class for testing/validation
 
 
 if __name__ == '__main__':
