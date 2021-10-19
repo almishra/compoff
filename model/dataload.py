@@ -70,7 +70,14 @@ class CompData(Dataset):
             test_row_data = np.asarray(test_row_data)
             test_row_runtime = np.asarray(test_row_runtime)
 
-        ## convert numpy array to torch tensor     
+        ## convert numpy array to torch tensor    
+        train_row_data = train_row_data.astype(np.float32)
+        train_row_runtime = train_row_runtime.astype(np.float32)
+        test_row_data = test_row_data.astype(np.float32)
+        test_row_runtime = test_row_runtime.astype(np.float32)
+
+
+
         train_row_data = torch.from_numpy(train_row_data)
         train_row_runtime = torch.from_numpy(train_row_runtime)
         test_row_data = torch.from_numpy(test_row_data)
