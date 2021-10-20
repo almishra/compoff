@@ -42,11 +42,15 @@ parser.add_argument('--shuffle', action='store_true',\
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-def innerloop(model, x_train, y_train, x_test, y_test):
+update_factor = 0.01 # arg parser argument
+update_steps = 2 # arg parser argument
+
+def train_loop(model, x_train, y_train, x_test, y_test):
     original_model_copy = copy.deepcopy(model)
     loss_tasks = 0
+    losses_q = [0 for _ in range(update_steps)]
     for k in range(task_num):
-        print(k)
+        # print(k)
         temp_weights=[w.clone() for w in list(original_model_copy.parameters())]
         
         outputs = original_model_copy.var_forward(x_train[k], temp_weights)
@@ -54,35 +58,63 @@ def innerloop(model, x_train, y_train, x_test, y_test):
         
         grad = torch.autograd.grad(loss, temp_weights)
         # temporary update weights 
-        temp_weights = [w - update_factor*g for w,g in zip(temp_weights, grad)]
+        fast_weights = [w - update_factor*g for w,g in zip(temp_weights, grad)]
         
         ## run updated weights on meta-test batch
-        new_outputs = original_model_copy.var_forward(x_test[k], temp_weights)
-        new_loss = criterion(new_outputs, y_test[k])
+        with torch.no_grad():
+            new_outputs = original_model_copy.var_forward(x_test[k], fast_weights)
+            new_loss = criterion(new_outputs, y_test[k])
+            losses_q[0] += new_loss
+            #print('First_update_loss:',new_loss)
         
-        loss_tasks += new_loss
-    
-    return loss_tasks 
+        for j in range(update_steps):
+            ops = original_model_copy.var_forward(x_train[k], fast_weights)
+            loss = criterion(ops, y_train[k])
+            #print(j, 'step loss for task', k, ' before update:', loss)
+            grads = torch.autograd.grad(loss, fast_weights)
+            
+            fast_weights = [w - update_factor*g for w,g in zip(fast_weights, grads)]
+            
+            new_ops = original_model_copy.var_forward(x_test[k], fast_weights)
+            new_loss = criterion(new_ops, y_test[k])
+            #print(j,' step loss for task',k,' after update:', new_loss)
+            losses_q[j] += new_loss
+        
+        
+    final_loss = losses_q[-1] / task_num
+    ## return loss where grad is calculated (cannot be wrapped by torch.no_grad() context manager)
+    return final_loss
 
 
+def train():
+    outer_epochs = 10
+    task_num = 3
+    global_model = OffloadModel(53,106)
+    meta_optim = torch.optim.Adam(global_model.parameters(), lr=1e-4)
+    #### add some lr decay: cosine or step or lambda
+    global_model = global_model.to(device)
+    criterion = nn.MSELoss()
 
-def train(global_model):
     for idx in range(outer_epochs):
         train_set_loader = DataLoader(train_sets, batch_size=task_num, drop_last=True)
+        outer_loss = 0
         for i, (x_train, y_train, x_test, y_test) in enumerate(train_set_loader):
             # print((x_train[0]))
             task_num_, set_size, cols = x_train.shape #<--verify
             #print(task_num_, set_size, cols)
             x_train, y_train, x_test, y_test = x_train.to(device), y_train.to(device), x_test.to(device), y_test.to(device)
 
-            # print(type(x_train))
-            ### train should return loss and accuracies(?)
-            total_loss = innerloop(global_model, x_train, y_train, x_test, y_test)  #<-- returns loss
+            # train returns loss
+            total_set_loss = train_loop(global_model, x_train, y_train, x_test, y_test) #<-- returns loss
 
             meta_optim.zero_grad()
-            total_loss.backward()
+            total_set_loss.backward()
             meta_optim.step()
-
+            outer_loss += total_set_loss.item()
+            #print('Set loss: ',total_set_loss.item())
+            ### do some validation or call the actual test function? (diff data set & loader)
+            
+        print('Outer loss:', np.sqrt(outer_loss))
 
 
 def test():
@@ -101,7 +133,7 @@ def main():
     worker(args)
 
 
-def worker():
+def worker(args):
     
     dr_columns = ['kernel','Compiler','Cluster','gpu_name','outer','inner','var_decl','ref_expr','int_literal','float_literal','mem_to',\
                 'mem_from','add_sub_int','add_sub_double','mul_int','mul_double','div_int','div_double','assign_int','assign_double']
@@ -129,7 +161,7 @@ def worker():
 
     model = OffloadModel(53,106)
     model = model.to(device)
-    train(model)
+    train()
     # 1. write methods for inner loop? or add it to the train function ----> separate + done
 
     #test_sets = CompData(X_test, y_test, train=False, test_batch=32)

@@ -14,7 +14,7 @@ class OffloadModel(torch.nn.Module):
         self.mod2 = nn.Sequential(OrderedDict([
             ('lin2', nn.Linear(num_hidden,num_hidden*2)),
             ('relu2', nn.ReLU()),
-            ('drop1', nn.Dropout(p=0.25)),
+#            ('drop1', nn.Dropout(p=0.25)),
             ('lin3', nn.Linear(num_hidden*2, num_hidden)),
             ('relu3', nn.ReLU())
 
@@ -22,7 +22,7 @@ class OffloadModel(torch.nn.Module):
         self.mod3 = nn.Sequential(OrderedDict([
             ('lin4', nn.Linear(num_hidden, num_hidden)),
             ('relu4', nn.ReLU()),
-            ('drop2', nn.Dropout(p=0.25)),
+            ('drop2', nn.Dropout(p=0.5)),
             ('lin5', nn.Linear(num_hidden,op_features)),
             ('sig1', nn.Sigmoid())
         ]))
@@ -30,17 +30,17 @@ class OffloadModel(torch.nn.Module):
     def forward(self, x):
         op = self.mod1(x)
         x = self.mod2(op)
-        x += op
+#        x += op
         x = self.mod3(x)
         return x
 
     def var_forward(self, x, weights):
         op = F.relu(F.linear(x, weights[0], weights[1]))
         x = F.relu(F.linear(op, weights[2], weights[3]))
-        x = F.dropout(p=0.25)
+#        x = F.dropout(p=0.25)
         x = F.relu(F.linear(x, weights[4], weights[5]))
-        x += op
+#        x += op
         x = F.relu(F.linear(x, weights[6], weights[7]))
-        x = F.dropout(p=0.25)
+        x = F.dropout(p=0.5)
         x = F.sigmoid(F.linear(x, weights[8], weights[9]))
         return x
