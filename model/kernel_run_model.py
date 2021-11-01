@@ -157,11 +157,11 @@ def init_weights(m):
 mod.apply(init_weights)
 
 criterion = nn.MSELoss()
-#criterion2 = nn.L1Loss()
-opt = torch.optim.Adam(mod.parameters(), lr=1e-3, weight_decay=3e-4)
+criterion2 = nn.L1Loss()
+opt = torch.optim.Adam(mod.parameters(), lr=1e-3, weight_decay=5e-4)
 #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=100, eta_min=1e-6)
-lr_scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=50, gamma=0.4)
-for e in range(140):
+lr_scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=35, gamma=0.1)
+for e in range(160):
     batch_losses = []
 
     for ix, (Xb, yb) in enumerate(tr_loader):
@@ -174,8 +174,8 @@ for e in range(140):
         _y = _y.to(device)
         preds = mod(_X)
         loss = criterion(preds, _y)
-        #loss2 = criterion2(preds, _y)
-        total_loss = loss #+ loss2
+        loss2 = criterion2(preds, _y)
+        total_loss = loss + loss2
         #==========backward pass==============
 
         #opt.zero_grad()
@@ -188,7 +188,7 @@ for e in range(140):
     mbl = np.mean(np.sqrt(batch_losses)).round(3)
     lr_scheduler.step()
     if e % 1 == 0:
-        print("Epoch [{}/{}], Batch loss: {}".format(e, 140, mbl))
+        print("Epoch [{}/{}], Batch loss: {}".format(e, 160, mbl))
 
 
 
