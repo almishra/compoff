@@ -22,7 +22,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class PrepareData(Dataset):
     def __init__(self, X, y, train=True, x_min=0, x_max=1, y_min=0, y_max=1):
         self.sc1 = StandardScaler()
-        self.sc2 = MinMaxScaler(feature_range=(1,25))
+        #self.sc2 = MinMaxScaler(feature_range=(1,25))
         if not torch.is_tensor(X):
             if train:
                 X = self.sc1.fit_transform(X)
@@ -46,14 +46,14 @@ class PrepareData(Dataset):
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
     
-    def get_sc1_params(self):
-        return self.sc1.data_min_, self.sc1.data_max_
+    #def get_sc1_params(self):
+    #    return self.sc1.data_min_, self.sc1.data_max_ # these are minmaxscaler attrs, stdscaler has something else
     
-    def get_sc2_params(self):
-        return self.sc2.data_min_, self.sc2.data_max_
+    #def get_sc2_params(self):
+    #    return self.sc2.data_min_, self.sc2.data_max_
     
     def return_scaler_obj(self):
-        return self.sc2
+        return self.sc1
 
 
 class KernelRunModel(torch.nn.Module):
@@ -66,7 +66,8 @@ class KernelRunModel(torch.nn.Module):
         #self.hidden4 = torch.nn.Linear(80,num_hidden)
         #self.hidden5 = torch.nn.Linear(40, num_hidden)
         self.hidden6 = torch.nn.Linear(num_hidden, num_hidden)
-        self.op_run = torch.nn.Linear(num_hidden, op_features)
+        self.hidden7 = torch.nn.Linear(num_hidden, ip_features)
+        self.op_run = torch.nn.Linear(ip_features, op_features)
         self.dropout = nn.Dropout(p=0.25)
     
     def forward(self, x):
@@ -80,8 +81,9 @@ class KernelRunModel(torch.nn.Module):
         #x = self.dropout(x)
         #x = F.relu(self.hidden5(x))
         #x += op
-        #x = self.dropout(x)
+        x = self.dropout(x)
         x = F.relu(self.hidden6(x))
+        x = F.relu(self.hidden7(x))
         #x = self.dropout(x)
         x = F.relu(self.op_run(x))
         return x
@@ -89,7 +91,7 @@ class KernelRunModel(torch.nn.Module):
 
 
 
-dr_columns = ['kernel','Compiler','Cluster','gpu_name','outer']
+dr_columns = ['kernel','Compiler','Cluster','gpu_name']
 #              'inner','var_decl','ref_expr',\
 #              'int_literal','float_literal','mem_to', 'mem_from','add_sub_int','add_sub_double',\
 #              'mul_int','mul_double','div_int','div_double','assign_int','assign_double']
@@ -137,7 +139,7 @@ split = int(np.floor(test_split * dataset_size))
 train_indices, test_indices = indices[split:], indices[:split]
 train_sampler = SubsetRandomSampler(train_indices)
 test_sampler = SubsetRandomSampler(test_indices)
-tr_loader = DataLoader(total_sets, batch_size=10, sampler=train_sampler)
+tr_loader = DataLoader(total_sets, batch_size=64, sampler=train_sampler)
 te_loader = DataLoader(total_sets, batch_size=1, sampler=test_sampler)
 print(len(tr_loader))
 
@@ -146,7 +148,7 @@ print(len(tr_loader))
 
 from torch.autograd import Variable
 
-mod = KernelRunModel(68,130).to(device)
+mod = KernelRunModel(69,138).to(device)
 def init_weights(m):
     if isinstance(m, nn.Linear):
         torch.nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
@@ -156,10 +158,10 @@ mod.apply(init_weights)
 
 criterion = nn.MSELoss()
 #criterion2 = nn.L1Loss()
-opt = torch.optim.Adam(mod.parameters(), lr=1e-3, weight_decay=1e-4)
+opt = torch.optim.Adam(mod.parameters(), lr=1e-3, weight_decay=3e-4)
 #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=100, eta_min=1e-6)
-lr_scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=40, gamma=0.5)
-for e in range(100):
+lr_scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=50, gamma=0.4)
+for e in range(140):
     batch_losses = []
 
     for ix, (Xb, yb) in enumerate(tr_loader):
@@ -182,11 +184,11 @@ for e in range(100):
 
         batch_losses.append(loss.item())
         #all_losses.append(loss.data[0])
-
+    
     mbl = np.mean(np.sqrt(batch_losses)).round(3)
-    #lr_scheduler.step()
+    lr_scheduler.step()
     if e % 1 == 0:
-        print("Epoch [{}/{}], Batch loss: {}".format(e, 100, mbl))
+        print("Epoch [{}/{}], Batch loss: {}".format(e, 140, mbl))
 
 
 
