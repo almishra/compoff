@@ -53,31 +53,36 @@ class DeepRes(nn.Module):
         
         self.block3 = self.make_layers_(block, ip_features*4)
         
-        self.lb4 = nn.Linear(ip_features*4, ip_features)
+        self.lb4 = nn.Linear(ip_features*4, ip_features*2)
         self.relu4 = nn.ReLU()
 
-        self.block4 = self.make_layers_(block, ip_features)
+        self.block4 = self.make_layers_(block, ip_features*2)
         
-        self.dr = nn.Dropout(p=0.5)
-        self.op = nn.Linear(ip_features, 1)
+        self.dr = nn.Dropout(p=0.2)
+        self.op = nn.Linear(ip_features*2, 1)
         self.relu5 = nn.ReLU()    
     
     def forward(self, x):
         x = self.relu1(self.l1(x))
         x = self.block1(x)
-        identity = x
+        #identity = x
         
         x = self.relu2(self.lb2(x))
         x = self.block2(x)
-        
+        identity = x
+
         x = self.relu3(self.lb3(x))
         x = self.block3(x)
-        x = self.dr(x)
+        #x = self.dr(x)
+        
         x = self.relu4(self.lb4(x))
         x = self.block4(x)
+        
         x += identity
+        
         #x = self.dr(x)
-        x = self.relu5(self.op(x))
+        #x = self.relu5(self.op(x))
+        x = self.op(x)
         return x
         
     def make_layers_(self, block, num_features):

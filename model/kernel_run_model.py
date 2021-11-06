@@ -17,10 +17,13 @@ import copy
 import glob
 from collections import OrderedDict
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_absolute_percentage_error, r2_score
+from deepres import DeepRes, Block
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class PrepareData(Dataset):
     def __init__(self, X, y, train=True, x_min=0, x_max=1, y_min=0, y_max=1):
+        #self.sc1 = MinMaxScaler(feature_range=(0,5))
         self.sc1 = StandardScaler()
         #self.sc2 = MinMaxScaler(feature_range=(1,25))
         if not torch.is_tensor(X):
@@ -65,26 +68,30 @@ class KernelRunModel(torch.nn.Module):
         self.hidden3 = torch.nn.Linear(num_hidden*2, num_hidden)
         #self.hidden4 = torch.nn.Linear(80,num_hidden)
         #self.hidden5 = torch.nn.Linear(40, num_hidden)
+        #self.bn1 = nn.BatchNorm1d(num_hidden)
+        #self.bn2 = nn.BatchNorm1d(num_hidden*2)
+        #self.bn3 = nn.BatchNorm1d(ip_features)
         self.hidden6 = torch.nn.Linear(num_hidden, num_hidden)
         self.hidden7 = torch.nn.Linear(num_hidden, ip_features)
         self.op_run = torch.nn.Linear(ip_features, op_features)
-        self.dropout = nn.Dropout(p=0.25)
+        self.dropout = nn.Dropout(p=0.5)
+        self.d2 = nn.Dropout(p=0.1)
     
     def forward(self, x):
         op = F.relu(self.ip(x))
-        
         x = F.relu(self.hidden2(op))
-        #x = self.dropout(x)
-        #x = F.relu(self.hidden3(x))
         #x += op
-        x = F.relu(self.hidden3(x))
+        #x = self.bn2(x)
+        op2 = F.relu(self.hidden3(x))
         #x = self.dropout(x)
         #x = F.relu(self.hidden5(x))
         #x += op
-        x = self.dropout(x)
-        x = F.relu(self.hidden6(x))
-        x = F.relu(self.hidden7(x))
+        x = self.dropout(op2)
+        x = F.relu(self.hidden6(op2))
         #x = self.dropout(x)
+        #x += op
+        x = F.relu(self.hidden7(x))
+        #x = self.d2(x)
         x = F.relu(self.op_run(x))
         return x
 
@@ -113,7 +120,7 @@ X = single.iloc[:, 0:-1]
 y = single.iloc[:, -1]
 
 train_eval_split=0.8
-split_seed=76
+split_seed=42
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=train_eval_split, random_state=split_seed, shuffle=True)
 
@@ -148,24 +155,31 @@ print(len(tr_loader))
 
 from torch.autograd import Variable
 
-mod = KernelRunModel(69,138).to(device)
+#mod = KernelRunModel(69,138).to(device)
+mod = DeepRes(4, Block, 69).to(device)
+
 def init_weights(m):
     if isinstance(m, nn.Linear):
-        torch.nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
+        #torch.nn.init.kaiming_uniform_(m.weight, nonlinearity='relu')
+        torch.nn.init.xavier_normal_(m.weight)
         m.bias.data.fill_(0.00)
 
 mod.apply(init_weights)
 
+#print(mod)
+
 criterion = nn.MSELoss()
 criterion2 = nn.L1Loss()
-opt = torch.optim.Adam(mod.parameters(), lr=1e-3, weight_decay=5e-4)
-#lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=100, eta_min=1e-6)
-lr_scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=35, gamma=0.1)
-for e in range(160):
+num_epochs=400
+opt = torch.optim.Adam(mod.parameters(), lr=4e-3, weight_decay=1e-4)
+#opt = torch.optim.Adam(mod.parameters(), lr=1e-3, weight_decay=5e-4)
+lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=num_epochs, eta_min=0)
+#lr_scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=40, gamma=0.25)
+for e in range(num_epochs):
     batch_losses = []
 
     for ix, (Xb, yb) in enumerate(tr_loader):
-        opt.zero_grad()
+        #opt.zero_grad()
         _X = Variable(Xb).float()
         _y = Variable(yb).float()
 
@@ -178,7 +192,7 @@ for e in range(160):
         total_loss = loss + loss2
         #==========backward pass==============
 
-        #opt.zero_grad()
+        opt.zero_grad()
         total_loss.backward()
         opt.step()
 
@@ -188,7 +202,7 @@ for e in range(160):
     mbl = np.mean(np.sqrt(batch_losses)).round(3)
     lr_scheduler.step()
     if e % 1 == 0:
-        print("Epoch [{}/{}], Batch loss: {}".format(e, 160, mbl))
+        print("Epoch [{}/{}], Batch loss: {}".format(e, num_epochs, mbl))
 
 
 
@@ -220,7 +234,7 @@ with torch.no_grad():
         _xt = _xt.to(device)
         _yt = _yt.to(device)
         
-        predictions = mod(_xt)
+        predictions = F.relu(mod(_xt))
         loss1 = criterion(predictions, _yt)
         preds_.append(predictions.cpu().data.numpy()[0])
         pr_val = predictions.cpu().data.numpy()[0]
