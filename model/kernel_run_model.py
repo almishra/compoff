@@ -2,15 +2,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-import argparse
 import pandas as pd
 from sklearn.model_selection import train_test_split
-import sys
+#import sys
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data import Dataset, DataLoader
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import MaxAbsScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler
 from torchsummary import summary
 import numpy as np
 import copy
@@ -138,17 +135,26 @@ total_sets = PrepareData(X, y, train=True)
 m_scaler = total_sets.return_scaler_obj()
 print(len(total_sets))
 test_split = 0.2
-random_seed= 76
+
 dataset_size = len(total_sets)
 indices = list(range(dataset_size))
 split = int(np.floor(test_split * dataset_size))
 
 train_indices, test_indices = indices[split:], indices[:split]
-train_sampler = SubsetRandomSampler(train_indices)
+
+
+#val split
+val_split=0.1 # 10% of remaining training data
+vsplit = int(np.floor(val_split*(1-test_split)*dataset_size))
+val_idx, train_idx = indices[split:split+vsplit], indices[split+vsplit:]
+
+train_sampler = SubsetRandomSampler(train_idx)
+val_sampler = SubsetRandomSampler(val_idx)
 test_sampler = SubsetRandomSampler(test_indices)
 tr_loader = DataLoader(total_sets, batch_size=64, sampler=train_sampler)
+val_loader = DataLoader(total_sets, batch_size=1, sampler=val_sampler)
 te_loader = DataLoader(total_sets, batch_size=1, sampler=test_sampler)
-print(len(tr_loader))
+print(len(tr_loader), len(val_loader), len(te_loader))
 
 
 
@@ -168,13 +174,21 @@ mod.apply(init_weights)
 
 #print(mod)
 
-criterion = nn.MSELoss()
-criterion2 = nn.L1Loss()
-num_epochs=400
-opt = torch.optim.Adam(mod.parameters(), lr=4e-3, weight_decay=1e-4)
+criterion = nn.MSELoss(reduction='mean')
+criterion2 = nn.L1Loss(reduction='sum')
+num_epochs=200
+
+#opt = torch.optim.Adam(mod.parameters(), lr=5e-3, weight_decay=1e-4)
+#opt = torch.optim.Adagrad(mod.parameters(), lr=1e-2, weight_decay=1e-5)
+opt = torch.optim.RMSprop(mod.parameters(), lr=5e-3, momentum=0.89, weight_decay=1e-4)
+# opt = torch.optim.LBFGS(mod.parameters(), lr=1e-3 ## check closure error)
+
 #opt = torch.optim.Adam(mod.parameters(), lr=1e-3, weight_decay=5e-4)
 lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=num_epochs, eta_min=0)
 #lr_scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=40, gamma=0.25)
+rmse_best=np.inf
+mape_best=np.inf
+best_model = None
 for e in range(num_epochs):
     batch_losses = []
 
@@ -200,13 +214,46 @@ for e in range(num_epochs):
         #all_losses.append(loss.data[0])
     
     mbl = np.mean(np.sqrt(batch_losses)).round(3)
+    
+    print("Epoch [{}/{}], Batch loss: {}".format(e, num_epochs, mbl))
+    
+    mod.eval()
+    mape=0.0
+    rmse=0.0
+    with torch.no_grad():
+        gtr_ = list()
+        pred_ = list()
+        for index, (xt, yt) in enumerate(val_loader):
+            gtr_.append(yt.cpu().data.numpy()[0])
+
+            _xt = Variable(xt).float()
+            _yt = Variable(yt).float()
+
+            _xt = _xt.to(device)
+            _yt = _yt.to(device)
+
+            predictions = mod(_xt)  ## no need to filter out negative op
+            loss1 = criterion(predictions, _yt)
+            pred_.append(predictions.cpu().data.numpy()[0])
+            #print(predictions, _yt)
+
+        mape = mean_absolute_percentage_error(gtr_, pred_)
+        rmse = np.sqrt(mean_squared_error(gtr_, pred_))
+        print('Epoch:', e, 'RMSE: ', rmse, ' MAPE:', mape)
+    
+    if mape < mape_best:
+        rmse_best=rmse
+        mape_best=mape
+        best_model=copy.deepcopy(mod)
+    
     lr_scheduler.step()
-    if e % 1 == 0:
-        print("Epoch [{}/{}], Batch loss: {}".format(e, num_epochs, mbl))
 
 
 
-mod.eval()
+print('\n\nEvaluating Model.......')
+print('Best Model - RMSE:', rmse_best, 'MAPE:', mape_best)
+#Evaluate model on testing data
+best_model.eval()
 less_5_gt = list()
 less_5_pred = list()
 
@@ -218,10 +265,10 @@ with torch.no_grad():
     # custom prediction metric
     less_5_pr = 0
     less_5_gt = 0
-    less_50_pr = 0
-    less_50_gt = 0
-    more_50_pr = 0
-    more_50_gt = 0
+    less_100_pr = 0
+    less_100_gt = 0
+    more_100_pr = 0
+    more_100_gt = 0
     
     for index, (xt, yt) in enumerate(te_loader):
         gt_.append(yt.cpu().data.numpy()[0])
@@ -234,7 +281,7 @@ with torch.no_grad():
         _xt = _xt.to(device)
         _yt = _yt.to(device)
         
-        predictions = F.relu(mod(_xt))
+        predictions = F.relu(best_model(_xt))
         loss1 = criterion(predictions, _yt)
         preds_.append(predictions.cpu().data.numpy()[0])
         pr_val = predictions.cpu().data.numpy()[0]
@@ -244,25 +291,25 @@ with torch.no_grad():
             if abs(gr_truth - pr_val) <= 2.00:
                 less_5_pr += 1
         elif gr_truth <= 100.00:
-            less_50_gt += 1
+            less_100_gt += 1
             if abs(gr_truth - pr_val) <= 10.00:
-                less_50_pr += 1
+                less_100_pr += 1
         else:
-            more_50_gt += 1
+            more_100_gt += 1
             if abs(gr_truth-pr_val) <= 0.1*gr_truth:
-                more_50_pr +=1
+                more_100_pr +=1
 
         
-        print(predictions, _yt)
+        print(predictions.cpu().data.numpy()[0][0],',', _yt.cpu().data.numpy()[0][0])
         total_loss += loss1
     
     mape = mean_absolute_percentage_error(gt_, preds_)
     rmse = np.sqrt(mean_squared_error(gt_, preds_))
-    print('Test Loss: ', np.mean(np.sqrt(total_loss.item())))
+    #print('Test Loss: ', np.mean(np.sqrt(total_loss.item())))
     print('RMSE: ', rmse, ' MAPE:', mape)
     print('5: ground truth total- ', less_5_gt, ' predicted total - ', less_5_pr)
-    print('100: ground truth total- ', less_50_gt, ' predicted total - ', less_50_pr)
-    print(' more 100: ground truth total - ', more_50_gt, ' predicted total - ', more_50_pr)
+    print('100: ground truth total- ', less_100_gt, ' predicted total - ', less_100_pr)
+    print(' more 100: ground truth total - ', more_100_gt, ' predicted total - ', more_100_pr)
 
 
 
