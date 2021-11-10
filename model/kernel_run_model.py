@@ -19,7 +19,7 @@ from deepres import DeepRes, Block
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class PrepareData(Dataset):
-    def __init__(self, X, y, train=True, x_min=0, x_max=1, y_min=0, y_max=1):
+    def __init__(self, X, y, train=True, scaler_obj=None):
         #self.sc1 = MinMaxScaler(feature_range=(0,5))
         self.sc1 = StandardScaler()
         #self.sc2 = MinMaxScaler(feature_range=(1,25))
@@ -28,8 +28,13 @@ class PrepareData(Dataset):
                 X = self.sc1.fit_transform(X)
                 self.X = torch.from_numpy(X)
             else:
-                #X = MinMaxScaler(feature_range=(x_min, x_max)).fit_transform(X)
-                self.X = torch.from_numpy(X)
+                if scaler_obj is not None:
+                    X = scaler_obj.transform(X)
+                    self.X = torch.from_numpy(X)
+                else:
+                    print('include scaler object from training')
+                    #X = MinMaxScaler(feature_range=(x_min, x_max)).fit_transform(X)
+                    #self.X = torch.from_numpy(X)
         if not torch.is_tensor(y):
             y = y.to_numpy()
             y = np.reshape(y, (-1,1))
@@ -101,7 +106,7 @@ dr_columns = ['kernel','Compiler','Cluster','gpu_name']
 #              'mul_int','mul_double','div_int','div_double','assign_int','assign_double']
 
 dataset_root=""
-df = pd.read_csv(dataset_root+"matrix_multiplication.csv")
+df = pd.read_csv(dataset_root+"matrix_multiplication_spec.csv")
 
 
 #single = pd.concat([df,df2], axis=0)
@@ -176,22 +181,23 @@ mod.apply(init_weights)
 
 criterion = nn.MSELoss(reduction='mean')
 criterion2 = nn.L1Loss(reduction='sum')
-num_epochs=200
+num_epochs=20
 
 #opt = torch.optim.Adam(mod.parameters(), lr=5e-3, weight_decay=1e-4)
-#opt = torch.optim.Adagrad(mod.parameters(), lr=1e-2, weight_decay=1e-5)
-opt = torch.optim.RMSprop(mod.parameters(), lr=5e-3, momentum=0.89, weight_decay=1e-4)
-# opt = torch.optim.LBFGS(mod.parameters(), lr=1e-3 ## check closure error)
+#opt = torch.optim.Adagrad(mod.parameters(), lr=1e-2, weight_decay=1e-4)
+opt = torch.optim.RMSprop(mod.parameters(), lr=5e-3, momentum=0.85, weight_decay=2e-4)
+# opt = torch.optim.LBFGS(mod.parameters(), lr=1e-3) ## check closure error
 
 #opt = torch.optim.Adam(mod.parameters(), lr=1e-3, weight_decay=5e-4)
 lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=num_epochs, eta_min=0)
 #lr_scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=40, gamma=0.25)
 rmse_best=np.inf
 mape_best=np.inf
+l2l1_best=np.inf
 best_model = None
 for e in range(num_epochs):
     batch_losses = []
-
+    mod.train()
     for ix, (Xb, yb) in enumerate(tr_loader):
         #opt.zero_grad()
         _X = Variable(Xb).float()
@@ -210,7 +216,7 @@ for e in range(num_epochs):
         total_loss.backward()
         opt.step()
 
-        batch_losses.append(loss.item())
+        batch_losses.append(total_loss.item())
         #all_losses.append(loss.data[0])
     
     mbl = np.mean(np.sqrt(batch_losses)).round(3)
@@ -220,9 +226,11 @@ for e in range(num_epochs):
     mod.eval()
     mape=0.0
     rmse=0.0
+    l2l1=0.0
     with torch.no_grad():
         gtr_ = list()
         pred_ = list()
+        val_loss = list()
         for index, (xt, yt) in enumerate(val_loader):
             gtr_.append(yt.cpu().data.numpy()[0])
 
@@ -234,16 +242,21 @@ for e in range(num_epochs):
 
             predictions = mod(_xt)  ## no need to filter out negative op
             loss1 = criterion(predictions, _yt)
+            loss2 = criterion2(predictions, _yt)
+            val_loss.append(loss1.item()+loss2.item())
+
             pred_.append(predictions.cpu().data.numpy()[0])
             #print(predictions, _yt)
 
         mape = mean_absolute_percentage_error(gtr_, pred_)
         rmse = np.sqrt(mean_squared_error(gtr_, pred_))
-        print('Epoch:', e, 'RMSE: ', rmse, ' MAPE:', mape)
+        l2l1 = np.mean(np.sqrt(val_loss)).round(3)
+        print('Epoch:', e, 'RMSE: ', rmse, ' MAPE:', mape, ' L2+L1 loss:', l2l1)
     
     if mape < mape_best:
         rmse_best=rmse
         mape_best=mape
+        l2l1_best=l2l1
         best_model=copy.deepcopy(mod)
     
     lr_scheduler.step()
@@ -251,7 +264,7 @@ for e in range(num_epochs):
 
 
 print('\n\nEvaluating Model.......')
-print('Best Model - RMSE:', rmse_best, 'MAPE:', mape_best)
+print('Best Model - RMSE:', rmse_best, ' MAPE:', mape_best, ' L2+L1-', l2l1_best)
 #Evaluate model on testing data
 best_model.eval()
 less_5_gt = list()
@@ -312,4 +325,67 @@ with torch.no_grad():
     print(' more 100: ground truth total - ', more_100_gt, ' predicted total - ', more_100_pr)
 
 
+
+print('\n\n\nevaluating custom set to see predictions for all offloading variants of one MM variant')
+df2 = pd.read_csv('mm_test_offload.csv')
+single2=df2.drop(columns=dr_columns)
+X2 = single2.iloc[:, 0:-1]
+y2 = single2.iloc[:, -1]
+total_sets2 = PrepareData(X2, y2, train=False, scaler_obj=m_scaler)
+test_loader_2 = DataLoader(total_sets2, batch_size=1, shuffle=True)
+
+
+with torch.no_grad():
+    #total_loss = 0
+    gt2_ = list()
+    preds2_ = list()
+
+    # custom prediction metric
+    #less_5_pr = 0
+    #less_5_gt = 0
+    #less_100_pr = 0
+    #less_100_gt = 0
+    #more_100_pr = 0
+    #more_100_gt = 0
+
+    for index, (xt, yt) in enumerate(test_loader_2):
+        gt2_.append(yt.cpu().data.numpy()[0])
+        gr_truth = yt.cpu().data.numpy()[0]
+
+
+        _xt = Variable(xt).float()
+        _yt = Variable(yt).float()
+
+        _xt = _xt.to(device)
+        _yt = _yt.to(device)
+
+        predictions = F.relu(best_model(_xt))
+        loss1 = criterion(predictions, _yt)
+        preds2_.append(predictions.cpu().data.numpy()[0])
+        pr_val = predictions.cpu().data.numpy()[0]
+
+        #if gr_truth <= 5.0:
+        #    less_5_gt += 1
+        #    if abs(gr_truth - pr_val) <= 2.00:
+        #        less_5_pr += 1
+        #elif gr_truth <= 100.00:
+        #    less_100_gt += 1
+        #    if abs(gr_truth - pr_val) <= 10.00:
+        #        less_100_pr += 1
+        #else:
+        #    more_100_gt += 1
+        #    if abs(gr_truth-pr_val) <= 0.1*gr_truth:
+        #        more_100_pr +=1
+
+
+        print(predictions.cpu().data.numpy()[0][0],',', _yt.cpu().data.numpy()[0][0])
+        #total_loss += loss1
+
+    mape = mean_absolute_percentage_error(gt2_, preds2_)
+    rmse = np.sqrt(mean_squared_error(gt2_, preds2_))
+    #print('Test Loss: ', np.mean(np.sqrt(total_loss.item())))
+    print('RMSE: ', rmse, ' MAPE:', mape)
+    #print('5: ground truth total- ', less_5_gt, ' predicted total - ', less_5_pr)
+    #print('100: ground truth total- ', less_100_gt, ' predicted total - ', less_100_pr)
+    #print(' more 100: ground truth total - ', more_100_gt, ' predicted total - ', more_100_pr)
 
