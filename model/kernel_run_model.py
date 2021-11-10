@@ -51,12 +51,6 @@ class PrepareData(Dataset):
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
     
-    #def get_sc1_params(self):
-    #    return self.sc1.data_min_, self.sc1.data_max_ # these are minmaxscaler attrs, stdscaler has something else
-    
-    #def get_sc2_params(self):
-    #    return self.sc2.data_min_, self.sc2.data_max_
-    
     def return_scaler_obj(self):
         return self.sc1
 
@@ -82,28 +76,21 @@ class KernelRunModel(torch.nn.Module):
     def forward(self, x):
         op = F.relu(self.ip(x))
         x = F.relu(self.hidden2(op))
-        #x += op
-        #x = self.bn2(x)
         op2 = F.relu(self.hidden3(x))
-        #x = self.dropout(x)
-        #x = F.relu(self.hidden5(x))
-        #x += op
+        
         x = self.dropout(op2)
         x = F.relu(self.hidden6(op2))
-        #x = self.dropout(x)
-        #x += op
+        
         x = F.relu(self.hidden7(x))
-        #x = self.d2(x)
+        
         x = F.relu(self.op_run(x))
         return x
 
 
 
 
-dr_columns = ['kernel','Compiler','Cluster','gpu_name']
-#              'inner','var_decl','ref_expr',\
-#              'int_literal','float_literal','mem_to', 'mem_from','add_sub_int','add_sub_double',\
-#              'mul_int','mul_double','div_int','div_double','assign_int','assign_double']
+dr_columns = ['kernel','Compiler','Cluster','gpu_name'] # using all hardware features except string variables
+
 
 dataset_root=""
 df = pd.read_csv(dataset_root+"matrix_multiplication_spec.csv")
@@ -111,9 +98,8 @@ df = pd.read_csv(dataset_root+"matrix_multiplication_spec.csv")
 
 #single = pd.concat([df,df2], axis=0)
 
-#single = single.loc[single['Cluster'] == 'Seawulf']
 single = df.drop(columns=dr_columns)
-#sys.exit("please check the dataset path and file names")
+
 
 print(list(single.columns))
 print(len(single))
@@ -124,16 +110,9 @@ y = single.iloc[:, -1]
 train_eval_split=0.8
 split_seed=42
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=train_eval_split, random_state=split_seed, shuffle=True)
+#X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=train_eval_split, random_state=split_seed, shuffle=True)
 
-#train_sets = CompData(X_train,y_train, scaler=True,train=True, task_num=3, num_sets=6, meta_train_batch=12, meta_test_batch=10)
-train_sets = PrepareData(X_train, y_train, train=True)
-#train_x_min, train_x_max = train_sets.get_sc1_params()
-#train_y_min, train_y_max = train_sets.get_sc2_params()
-
-
-
-train_loader = DataLoader(train_sets, batch_size=1, shuffle=True)
+#train_sets = PrepareData(X_train, y_train, train=True)
 
 
 total_sets = PrepareData(X, y, train=True)
@@ -336,17 +315,8 @@ test_loader_2 = DataLoader(total_sets2, batch_size=1, shuffle=True)
 
 
 with torch.no_grad():
-    #total_loss = 0
     gt2_ = list()
     preds2_ = list()
-
-    # custom prediction metric
-    #less_5_pr = 0
-    #less_5_gt = 0
-    #less_100_pr = 0
-    #less_100_gt = 0
-    #more_100_pr = 0
-    #more_100_gt = 0
 
     for index, (xt, yt) in enumerate(test_loader_2):
         gt2_.append(yt.cpu().data.numpy()[0])
@@ -364,28 +334,10 @@ with torch.no_grad():
         preds2_.append(predictions.cpu().data.numpy()[0])
         pr_val = predictions.cpu().data.numpy()[0]
 
-        #if gr_truth <= 5.0:
-        #    less_5_gt += 1
-        #    if abs(gr_truth - pr_val) <= 2.00:
-        #        less_5_pr += 1
-        #elif gr_truth <= 100.00:
-        #    less_100_gt += 1
-        #    if abs(gr_truth - pr_val) <= 10.00:
-        #        less_100_pr += 1
-        #else:
-        #    more_100_gt += 1
-        #    if abs(gr_truth-pr_val) <= 0.1*gr_truth:
-        #        more_100_pr +=1
-
-
         print(predictions.cpu().data.numpy()[0][0],',', _yt.cpu().data.numpy()[0][0])
-        #total_loss += loss1
+        
 
     mape = mean_absolute_percentage_error(gt2_, preds2_)
     rmse = np.sqrt(mean_squared_error(gt2_, preds2_))
-    #print('Test Loss: ', np.mean(np.sqrt(total_loss.item())))
     print('RMSE: ', rmse, ' MAPE:', mape)
-    #print('5: ground truth total- ', less_5_gt, ' predicted total - ', less_5_pr)
-    #print('100: ground truth total- ', less_100_gt, ' predicted total - ', less_100_pr)
-    #print(' more 100: ground truth total - ', more_100_gt, ' predicted total - ', more_100_pr)
 
