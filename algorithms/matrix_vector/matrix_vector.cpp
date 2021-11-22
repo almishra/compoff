@@ -29,8 +29,11 @@
 #ifndef N
 #define N 3
 #endif
+#ifndef COUNT
+#define COUNT 1000
+#endif
 
-void matrix_vector( 
+void matrix_vector_cpu( 
     float (*matrixA)[LB][LC][LD][LE][M][N],
     float (*vectorB)[LB][LC][LD][LE][N], 
     float (*vectorC)[LB][LC][LD][N])
@@ -42,6 +45,7 @@ void matrix_vector(
       for(int c=0; c<LC; c++) {
         for(int d=0; d<LD; d++) {
 
+          for(int count = 0; count <COUNT; count++) {
           for(int n=0; n<N; n++) {
             vectorC[a][b][c][d][n] = 0;
           }
@@ -58,6 +62,7 @@ void matrix_vector(
               vectorC[a][b][c][d][n] += m * temp[n];
             }
           } // end e loop
+          }
 
         } // end d loop
       } // end c loop
@@ -80,6 +85,7 @@ void matrix_vector_off(
       for(int c=0; c<LC; c++) {
         for(int d=0; d<LD; d++) {
 
+          for(int count = 0; count <COUNT; count++) {
           for(int n=0; n<N; n++) {
             vectorC[dev][a][b][c][d][n] = 0;
           }
@@ -96,6 +102,7 @@ void matrix_vector_off(
               vectorC[dev][a][b][c][d][n] += m * temp[n];
             }
           } // end e loop
+          }
 
         } // end d loop
       } // end c loop
@@ -105,13 +112,14 @@ void matrix_vector_off(
 
 int main() 
 {
-  printf("Device,mem_to,mem_from,LA,LB,LC,LD,LE,M,N,runtime(us),runtime(s)\n");
+  printf("Device,mem_to,mem_from,COUNT,LA,LB,LC,LD,LE,M,N,runtime(us),runtime(s)\n");
   long mem_to = sizeof(float)*LA*LB*LC*LD*LE*M*N + sizeof(float)*LA*LB*LC*LD*LE*N;
   long mem_from = sizeof(float)*LA*LB*LC*LD*N;
 #ifdef DEBUG
   fprintf(stderr, "Total memory for matA = %lf\n", sizeof(float)*LA*LB*LC*LD*LE*M*N / 1024.0 / 1024.0 / 1024.0);
   fprintf(stderr, "Total memory for vecB = %lf\n", sizeof(float)*LA*LB*LC*LD*LE*N / 1024.0 / 1024.0 / 1024.0);
   fprintf(stderr, "Total memory for vecC = %lf\n", sizeof(float)*LA*LB*LC*LD*N / 1024.0 / 1024.0 / 1024.0);
+  fflush(stderr);
 #endif
   float (*matA)[LB][LC][LD][LE][M][N] =
     (float (*)[LB][LC][LD][LE][M][N]) malloc(sizeof(float)*LA*LB*LC*LD*LE*M*N);
@@ -139,11 +147,11 @@ int main()
 
   struct timeval  tv1_cpu, tv2_cpu;
   gettimeofday(&tv1_cpu, NULL);
-  matrix_vector(matA, vecB, vecCPU);
+  matrix_vector_cpu(matA, vecB, vecCPU);
   gettimeofday(&tv2_cpu, NULL);
   long long runtime_cpu = (tv2_cpu.tv_sec - tv1_cpu.tv_sec) * 1000000;
   runtime_cpu += tv2_cpu.tv_usec - tv1_cpu.tv_usec;
-  printf("CPU,0,0,%d,%d,%d,%d,%d,%d,%d,%lld,%0.4f\n", LA,LB,LC,LD,LE,M,N,runtime_cpu, (double)(runtime_cpu/1000000.0));
+  printf("CPU,0,0,%d,%d,%d,%d,%d,%d,%d,%d,%lld,%0.4f\n", COUNT, LA,LB,LC,LD,LE,M,N,runtime_cpu, (double)(runtime_cpu/1000000.0));
   fflush(stdout);
 
 #ifdef DEBUG1
@@ -180,7 +188,7 @@ int main()
     runtime += tv2.tv_usec - tv1.tv_usec;
 #pragma omp critical
     {
-      printf("GPU%d,%ld,%ld,%d,%d,%d,%d,%d,%d,%d,%lld,%0.4f\n", device, mem_to, mem_from, LA,LB,LC,LD,LE,M,N,runtime, (double)(runtime/1000000.0));
+      printf("GPU%d,%ld,%ld,%d,%d,%d,%d,%d,%d,%d,%d,%lld,%0.4f\n", device, mem_to, mem_from, COUNT, LA,LB,LC,LD,LE,M,N,runtime, (double)(runtime/1000000.0));
       fflush(stdout);
     }
 
