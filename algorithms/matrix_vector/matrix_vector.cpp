@@ -5,7 +5,6 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-
 enum VARIANT {
   STATIC1, STATIC2, STATIC3, STATIC4,
   DYNAMIC1, DYNAMIC2, DYNAMIC3, DYNAMIC4,
@@ -47,6 +46,7 @@ std::string VAR_STR[NUM_VAR] = {
 #define COUNT 1000
 #endif
 
+static FILE *fp;
 static float (*vecCPU)[LB][LC][LD][N];
 static long mem_to;
 static long mem_from;
@@ -86,8 +86,8 @@ void output(VARIANT var, int device, long long runtime)
 {
 #pragma omp critical
   {
-    printf("GPU%d,%s,%ld,%ld,%d,%d,%d,%d,%d,%d,%d,%d,%lld,%0.4f\n", device, VAR_STR[var].c_str(), mem_to, mem_from, COUNT, LA,LB,LC,LD,LE,M,N,runtime, (double)(runtime/1000000.0));
-    fflush(stdout);
+    fprintf(fp, "GPU%d,%s,%ld,%ld,%d,%d,%d,%d,%d,%d,%d,%d,%lld,%0.4f\n", device, VAR_STR[var].c_str(), mem_to, mem_from, COUNT, LA,LB,LC,LD,LE,M,N,runtime, (double)(runtime/1000000.0));
+    fflush(fp);
   }
 }
 
@@ -744,9 +744,21 @@ void kernel(VARIANT var,
   }
 }
 
-int main() 
+int main(int argc, char **argv)
 {
-  printf("Device,mem_to,mem_from,COUNT,LA,LB,LC,LD,LE,M,N,runtime(us),runtime(s)\n");
+  std::string output_file_name;
+  if(argc > 1) {
+    output_file_name = argv[1];
+  } else {
+    output_file_name = argv[0];
+    output_file_name = output_file_name.substr(output_file_name.find_last_of("/\\")+1);
+    output_file_name = output_file_name.substr(0, output_file_name.size() - 3);
+    output_file_name = "output_" + output_file_name + "csv";
+  }
+  printf("%s\n", output_file_name.c_str());
+  fp = fopen(output_file_name.c_str(), "w");
+
+  fprintf(fp, "Device,scheduling,collapse,mem_to,mem_from,COUNT,LA,LB,LC,LD,LE,M,N,runtime(us),runtime(s)\n");
   mem_to = sizeof(float)*LA*LB*LC*LD*LE*M*N + sizeof(float)*LA*LB*LC*LD*LE*N;
   mem_from = sizeof(float)*LA*LB*LC*LD*N;
 #ifdef DEBUG
@@ -757,6 +769,13 @@ int main()
 #endif
   float (*matA)[LB][LC][LD][LE][M][N] =
     (float (*)[LB][LC][LD][LE][M][N]) malloc(sizeof(float)*LA*LB*LC*LD*LE*M*N);
+  float (*vecB)[LB][LC][LD][LE][N] =
+    (float (*)[LB][LC][LD][LE][N]) malloc(sizeof(float)*LA*LB*LC*LD*LE*N);
+
+#pragma omp target map(matA[0:LA][0:LB][0:LC][0:LD][0:LE][0:M][0:N]) \
+  map(vecB[0:LA][0:LB][0:LC][0:LD][0:LE][0:N])
+  {}
+
   for(int a=0; a<LA; a++)
     for(int b=0; b<LB; b++)
       for(int c=0; c<LC; c++)
@@ -766,8 +785,6 @@ int main()
               for(int n=0;n<N;n++)
                   matA[a][b][c][d][e][m][n] = 0.1;
 
-  float (*vecB)[LB][LC][LD][LE][N] =
-    (float (*)[LB][LC][LD][LE][N]) malloc(sizeof(float)*LA*LB*LC*LD*LE*N);
   for(int a=0; a<LA; a++)
     for(int b=0; b<LB; b++)
       for(int c=0; c<LC; c++)
@@ -784,8 +801,8 @@ int main()
   gettimeofday(&tv2_cpu, NULL);
   long long runtime_cpu = (tv2_cpu.tv_sec - tv1_cpu.tv_sec) * 1000000;
   runtime_cpu += tv2_cpu.tv_usec - tv1_cpu.tv_usec;
-  printf("CPU,0,0,%d,%d,%d,%d,%d,%d,%d,%d,%lld,%0.4f\n", COUNT, LA,LB,LC,LD,LE,M,N,runtime_cpu, (double)(runtime_cpu/1000000.0));
-  fflush(stdout);
+  fprintf(fp, "CPU,0,0,%d,%d,%d,%d,%d,%d,%d,%d,%lld,%0.4f\n", COUNT, LA,LB,LC,LD,LE,M,N,runtime_cpu, (double)(runtime_cpu/1000000.0));
+  fflush(fp);
 
   print(vecCPU);
 
