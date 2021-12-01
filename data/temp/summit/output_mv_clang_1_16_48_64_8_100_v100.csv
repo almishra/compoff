@@ -1,0 +1,3 @@
+Device,scheduling,collapse,mem_to,mem_from,COUNT,LA,LB,LC,LD,LE,M,N,runtime(us),runtime(s)
+CPU,0,0,100,1,16,48,64,8,3,3,3807422,3.8074
+GPU0,static,1,18874368,589824,100,1,16,48,64,8,3,3,2156200959,2156.2010
