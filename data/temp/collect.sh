@@ -1,7 +1,7 @@
-summit="1,0,0,0,Clang,Summit,4,16,2,3800,32,32,512,10240,NVIDIA Tesla V100-SXM2-16GB,300,512,877,900,16160,1312,5120,7,32,64,2048,32,65536,65536,255,1024,64,1024,96";
-seawulf="1,0,0,0,Clang,Seawulf,1,14,2,1200,32,32,256,35840,NVIDIA Tesla K80-PCIe-12GB,16,128,2505,240,11441,562,2496,3.7,32,64,2048,16,65536,65536,255,1024,192,341,16";
-ookami="";
-exxact="";
+summit="1,0,0,0,Clang,Summit,4,16,2,3800,32,32,512,10240,NVIDIA Tesla V100-SXM2-16GB,300,877,900,16160,1312,5120,7,32,64,2048,32,65536,65536,255,1024,96";
+seawulf="1,0,0,0,Clang,Seawulf,1,14,2,1200,32,32,256,35840,NVIDIA Tesla K80-PCIe-12GB,16,2505,240,11441,562,2496,3.7,32,64,2048,16,65536,65536,255,1024,16";
+ookami="1,0,0,0,Clang,Ookami,1,32,2,1685,32,32,512,32768,Tesla V100-PCIE-32GB,32,877,900,32510,1380,5120,7,32,64,2048,32,65536,65536,255,1024,96";
+exxact="1,0,0,0,Clang,Exxact,2,10,2,2400,640,640,20480,28160,NVIDIA GeForce RTX 2080,32,7000,448,7982,2100,2944,7.5,32,32,1024,16,65536,65536,255,1024,64";
 
 CLUSTER="summit";
 INIT=${summit};
@@ -22,7 +22,7 @@ echo $CLUSTER;
 echo $INIT;
 echo $OUTPUT;
 
-echo "kernel,clang,gcc,nvc,intel,Compiler,Cluster,thread_per_core,core_per_socket,num_sockets,cpu_clock,l1i,l1d,l2,l3,gpu_name,connector_bandwidth,num_memory_bus,memory_clock,memory_bandwidth,memory_total,sm_clock,num_cores,compute_capability,threads_per_wrap,max_wraps_per_sm,max_threads_per_sm,max_thread_blocks_per_sm,max_32-bit_registers_per_sm,max_registers_per_block,max_registers_per_thread,max_thread_block_size,fp32_cores_per_sm,sm_registers_per_fp32_cores,shared_memory_size_per_sm,collapse1,collapse2,collapse3,collapse4,static,dynamic,guided,Iter,VarDecl,refExpr,intLiteral,floatLiteral,mem_to,mem_from,add_sub_int,add_sub_float,mul_int,mul_float,div_int,div_float,bit_rel_logic_int,bit_rel_logic_float,rem_int,assign_int,assign_float,Iter_log,VarDecl_log,refExpr_log,intLiteral_log,floatLiteral_log,mem_to_log,mem_from_log,add_sub_int_log,add_sub_float_log,mul_int_log,mul_float_log,div_int_log,div_float_log,bit_rel_logic_int_log,bit_rel_logic_float_log,rem_int_log,assign_int_log,assign_float_log,runtime" > $OUTPUT
+echo "kernel,clang,gcc,nvc,intel,Compiler,Cluster,thread_per_core,core_per_socket,num_sockets,cpu_clock,l1i,l1d,l2,l3,gpu_name,connector_bandwidth,memory_clock,memory_bandwidth,memory_total,sm_clock,num_cores,compute_capability,threads_per_wrap,max_wraps_per_sm,max_threads_per_sm,max_thread_blocks_per_sm,max_32-bit_registers_per_sm,max_registers_per_block,max_registers_per_thread,max_thread_block_size,shared_memory_size_per_sm,collapse1,collapse2,collapse3,collapse4,static,dynamic,guided,Iter,VarDecl,refExpr,intLiteral,floatLiteral,mem_to,mem_from,add_sub_int,add_sub_float,mul_int,mul_float,div_int,div_float,bit_rel_logic_int,bit_rel_logic_float,rem_int,assign_int,assign_float,Iter_log,VarDecl_log,refExpr_log,intLiteral_log,floatLiteral_log,mem_to_log,mem_from_log,add_sub_int_log,add_sub_float_log,mul_int_log,mul_float_log,div_int_log,div_float_log,bit_rel_logic_int_log,bit_rel_logic_float_log,rem_int_log,assign_int_log,assign_float_log,runtime" > $OUTPUT
 for i in `ls ${CLUSTER}/output_mv_clang_*`;
 do 
   var=($(echo ${i} | awk -F'_' '{print $4 " " $5 " " $6 " " $7 " " $8 " " $9}'));
