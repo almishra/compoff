@@ -1,0 +1,53 @@
+CXX=clang++
+
+CFLAGS= -g -O3 -fopenmp
+GPU_FLAGS=-fopenmp-targets=nvptx64-nvidia-cuda 
+
+all: k80 p100 v100 rtx
+
+k80: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	for X in 16 48 96; do \
+	for Y in 16 48 96; do \
+	for Z in 16 48 96; do \
+	for T in 16 48 96; do \
+		if [ ! -f output_dslash_$${X}_$${Y}_$${Z}_$${T}_k80.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 dwf_dslash_4_driver.cpp -DLX=$${X} -DLY=$${Y} -DLZ=$${Z} -DLT=$${T} -o dslash_$${X}_$${Y}_$${Z}_$${T}_k80.out; \
+			./dslash_$${X}_$${Y}_$${Z}_$${T}_k80.out; \
+		fi; \
+	done; done; done; done
+
+p100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	for X in 16 48 96; do \
+	for Y in 16 48 96; do \
+	for Z in 16 48 96; do \
+	for T in 16 48 96; do \
+		if [ ! -f output_dslash_$${X}_$${Y}_$${Z}_$${T}_p100.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 dwf_dslash_4_driver.cpp -DLX=$${X} -DLY=$${Y} -DLZ=$${Z} -DLT=$${T} -o dslash_$${X}_$${Y}_$${Z}_$${T}_p100.out; \
+			./dslash_$${X}_$${Y}_$${Z}_$${T}_p100.out; \
+		fi; \
+	done; done; done; done
+
+v100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	for X in 16 48 96; do \
+	for Y in 16 48 96; do \
+	for Z in 16 48 96; do \
+	for T in 16 48 96; do \
+		if [ ! -f output_dslash_$${X}_$${Y}_$${Z}_$${T}_v100.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 dwf_dslash_4_driver.cpp -DLX=$${X} -DLY=$${Y} -DLZ=$${Z} -DLT=$${T} -o dslash_$${X}_$${Y}_$${Z}_$${T}_v100.out; \
+			./dslash_$${X}_$${Y}_$${Z}_$${T}_v100.out; \
+		fi; \
+	done; done; done; done
+
+rtx: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	for X in 16 48 96; do \
+	for Y in 16 48 96; do \
+	for Z in 16 48 96; do \
+	for T in 16 48 96; do \
+		if [ ! -f output_dslash_$${X}_$${Y}_$${Z}_$${T}_rtx.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 dwf_dslash_4_driver.cpp -DLX=$${X} -DLY=$${Y} -DLZ=$${Z} -DLT=$${T} -o dslash_$${X}_$${Y}_$${Z}_$${T}_rtx.out; \
+			./dslash_$${X}_$${Y}_$${Z}_$${T}_rtx.out; \
+		fi; \
+	done; done; done; done
+
+clean:
+	rm -rf *out 
