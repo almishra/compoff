@@ -11,7 +11,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler
 from torchsummary import summary
 import numpy as np
 import copy
-import glob
+import random
 from collections import OrderedDict
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_absolute_percentage_error, r2_score
 from deepres import DeepRes, Block
@@ -37,9 +37,11 @@ class PrepareData(Dataset):
                     #self.X = torch.from_numpy(X)
         if not torch.is_tensor(y):
             y = y.to_numpy()
+            y = np.true_divide(y, 1e6)
             y = np.reshape(y, (-1,1))
             if train:
                 #y = self.sc2.fit_transform(y)
+                print(type(y.dtype), y.dtype)
                 self.y = torch.from_numpy(y)
             else:
                 #y = MinMaxScaler(feature_range=(y_min, y_max)).fit_transform(y)
@@ -93,12 +95,14 @@ dr_columns = ['kernel','Compiler','Cluster','gpu_name'] # using all hardware fea
 
 
 dataset_root=""
-df = pd.read_csv(dataset_root+"matrix_multiplication_spec.csv")
+df = pd.read_csv(dataset_root+"exxact_gpu0.csv")
+df2 = pd.read_csv(dataset_root+"ookami_gpu0.csv")
+df3 = pd.read_csv(dataset_root+"seawulf_gpu0.csv")
+df4 = pd.read_csv(dataset_root+"summit_gpu0.csv")
 
-
-#single = pd.concat([df,df2], axis=0)
-
-single = df.drop(columns=dr_columns)
+single = pd.concat([df,df2,df4], axis=0)
+single = single.drop(columns=dr_columns)
+#single = df.drop(columns=dr_columns)
 
 
 print(list(single.columns))
@@ -122,6 +126,9 @@ test_split = 0.2
 
 dataset_size = len(total_sets)
 indices = list(range(dataset_size))
+#print(indices, type(indices))
+random.shuffle(indices)
+#print(indices, type(indices))
 split = int(np.floor(test_split * dataset_size))
 
 train_indices, test_indices = indices[split:], indices[:split]
@@ -135,10 +142,10 @@ val_idx, train_idx = indices[split:split+vsplit], indices[split+vsplit:]
 train_sampler = SubsetRandomSampler(train_idx)
 val_sampler = SubsetRandomSampler(val_idx)
 test_sampler = SubsetRandomSampler(test_indices)
-tr_loader = DataLoader(total_sets, batch_size=64, sampler=train_sampler)
+tr_loader = DataLoader(total_sets, batch_size=256, sampler=train_sampler)
 val_loader = DataLoader(total_sets, batch_size=1, sampler=val_sampler)
 te_loader = DataLoader(total_sets, batch_size=1, sampler=test_sampler)
-print(len(tr_loader), len(val_loader), len(te_loader))
+print('train batches: ', len(tr_loader),' validate samples:', len(val_loader),' test samples:', len(te_loader))
 
 
 
@@ -146,7 +153,7 @@ print(len(tr_loader), len(val_loader), len(te_loader))
 from torch.autograd import Variable
 
 #mod = KernelRunModel(69,138).to(device)
-mod = DeepRes(4, Block, 69).to(device)
+mod = DeepRes(4, Block, 71).to(device)
 
 def init_weights(m):
     if isinstance(m, nn.Linear):
@@ -160,16 +167,17 @@ mod.apply(init_weights)
 
 criterion = nn.MSELoss(reduction='mean')
 criterion2 = nn.L1Loss(reduction='sum')
-num_epochs=20
+num_epochs=100
 
-#opt = torch.optim.Adam(mod.parameters(), lr=5e-3, weight_decay=1e-4)
+#opt = torch.optim.Adam(mod.parameters(), lr=1e-2, weight_decay=1e-4)
 #opt = torch.optim.Adagrad(mod.parameters(), lr=1e-2, weight_decay=1e-4)
-opt = torch.optim.RMSprop(mod.parameters(), lr=5e-3, momentum=0.85, weight_decay=2e-4)
+opt = torch.optim.RMSprop(mod.parameters(), lr=1e-2, momentum=0.85, weight_decay=1e-4)
+
 # opt = torch.optim.LBFGS(mod.parameters(), lr=1e-3) ## check closure error
 
 #opt = torch.optim.Adam(mod.parameters(), lr=1e-3, weight_decay=5e-4)
 lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=num_epochs, eta_min=0)
-#lr_scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=40, gamma=0.25)
+#lr_scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=40, gamma=0.5)
 rmse_best=np.inf
 mape_best=np.inf
 l2l1_best=np.inf
@@ -232,15 +240,15 @@ for e in range(num_epochs):
         l2l1 = np.mean(np.sqrt(val_loss)).round(3)
         print('Epoch:', e, 'RMSE: ', rmse, ' MAPE:', mape, ' L2+L1 loss:', l2l1)
     
-    if mape < mape_best:
-        rmse_best=rmse
-        mape_best=mape
-        l2l1_best=l2l1
-        best_model=copy.deepcopy(mod)
+    #if rmse < rmse_best:
+    #    rmse_best=rmse
+    #    mape_best=mape
+    #    l2l1_best=l2l1
+    #    best_model=copy.deepcopy(mod)
     
     lr_scheduler.step()
 
-
+best_model=copy.deepcopy(mod)
 
 print('\n\nEvaluating Model.......')
 print('Best Model - RMSE:', rmse_best, ' MAPE:', mape_best, ' L2+L1-', l2l1_best)
@@ -304,9 +312,10 @@ with torch.no_grad():
     print(' more 100: ground truth total - ', more_100_gt, ' predicted total - ', more_100_pr)
 
 
-
+## Upadte data block when alok uploads qcd data
+'''
 print('\n\n\nevaluating custom set to see predictions for all offloading variants of one MM variant')
-df2 = pd.read_csv('mm_test_offload.csv')
+df2 = pd.read_csv('Wilson.csv')
 single2=df2.drop(columns=dr_columns)
 X2 = single2.iloc[:, 0:-1]
 y2 = single2.iloc[:, -1]
@@ -340,4 +349,5 @@ with torch.no_grad():
     mape = mean_absolute_percentage_error(gt2_, preds2_)
     rmse = np.sqrt(mean_squared_error(gt2_, preds2_))
     print('RMSE: ', rmse, ' MAPE:', mape)
+'''
 
