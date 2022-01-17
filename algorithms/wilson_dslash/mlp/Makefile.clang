@@ -1,0 +1,45 @@
+CXX=clang++
+CUDA_TOOLKIT_ROOT_DIR=/cm/shared/apps/cuda10.0/toolkit/10.0.130
+CFLAGS= -g -O3 -fopenmp
+GPU_FLAGS=-fopenmp-targets=nvptx64 --cuda-path=$(CUDA_TOOLKIT_ROOT_DIR)
+
+all: k80 p100 v100 rtx
+
+k80: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	for Z in 16 128 256 384 512 640 768 896 1024 1152; do \
+	for T in 16 128 256 384 512 640 768 896 1024 1152; do \
+		if [ ! -f output_dslash_$${Z}_$${T}_clang_k80.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 dwf_dslash_4_driver.cpp -DLX=$${X} -DLY=$${Y} -DLZ=$${Z} -DLT=$${T} -o dslash_$${Z}_$${T}_clang_k80.out; \
+			./dslash_$${Z}_$${T}_clang_k80.out; \
+		fi; \
+	done; done; done; done
+
+p100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	for Z in 16 128 256 384 512 640 768 896 1024 1152; do \
+	for T in 16 128 256 384 512 640 768 896 1024 1152; do \
+		if [ ! -f output_dslash_$${Z}_$${T}_clang_p100.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 dwf_dslash_4_driver.cpp -DLZ=$${Z} -DLT=$${T} -o dslash_$${Z}_$${T}_clang_p100.out; \
+			./dslash_$${Z}_$${T}_clang_p100.out; \
+		fi; \
+	done; done;
+
+v100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	for Z in 16 128 256 384 512 640 768 896 1024 1152; do \
+	for T in 16 128 256 384 512 640 768 896 1024 1152; do \
+		if [ ! -f output_dslash_$${Z}_$${T}_clang_v100.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) $(LDFLAGS) -Xopenmp-target -march=sm_70 dwf_dslash_4_driver.cpp -DLZ=$${Z} -DLT=$${T} -o dslash_$${Z}_$${T}_clang_v100.out; \
+			./dslash_$${Z}_$${T}_clang_v100.out; \
+		fi; \
+	done; done;
+
+rtx: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	for Z in 16 128 256 384 512 640 768 896 1024 1152; do \
+	for T in 16 128 256 384 512 640 768 896 1024 1152; do \
+		if [ ! -f output_dslash_$${Z}_$${T}_clang_rtx.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 dwf_dslash_4_driver.cpp -DLX=$${X} -DLY=$${Y} -DLZ=$${Z} -DLT=$${T} -o dslash_$${Z}_$${T}_clang_rtx.out; \
+			./dslash_$${Z}_$${T}_clang_rtx.out; \
+		fi; \
+	done; done; done; done
+
+clean:
+	rm -rf *.out 
