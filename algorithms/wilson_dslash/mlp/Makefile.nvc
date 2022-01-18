@@ -1,0 +1,27 @@
+CFLAGS = -Wall -O3
+GPU_FLAGS = -mp=gpu
+CC=nvc
+CXX=nvc++
+
+all: v100 rtx
+
+v100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	for Z in 16 128 256 384 512 640 768 896 1024 1152; do \
+	for T in 16 128 256 384 512 640 768 896 1024 1152; do \
+		if [ ! -f output_dslash_$${Z}_$${T}_nvc_v100.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) dwf_dslash_4_driver.cpp -DLZ=$${Z} -DLT=$${T} -o dslash_$${Z}_$${T}_nvc_v100.out; \
+			./dslash_$${Z}_$${T}_nvc_v100.out; \
+		fi; \
+	done; done;
+
+rtx: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	for Z in 16 128 256 384 512 640 768 896 1024 1152; do \
+	for T in 16 128 256 384 512 640 768 896 1024 1152; do \
+		if [ ! -f output_dslash_$${Z}_$${T}_nvc_rtx.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) dwf_dslash_4_driver.cpp -DLZ=$${Z} -DLT=$${T} -o dslash_$${Z}_$${T}_nvc_rtx.out; \
+			./dslash_$${Z}_$${T}_nvc_rtx.out; \
+		fi; \
+	done; done;
+
+clean:
+	$(RM) dslash_*nvc_*.out
