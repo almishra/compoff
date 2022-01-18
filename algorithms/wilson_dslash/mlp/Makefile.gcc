@@ -1,0 +1,44 @@
+CFLAGS = -Wall -O0 -fopenmp
+OFFLOAD_FLAG = -foffload=nvptx-none
+CC=g++
+
+all: k80 p100 v100 rtx
+
+k80: dwf_dslash_4_driver.cpp
+	for Z in 16 128 256 384 512 640 768 896 1024 1152; do \
+	for T in 16 128 256 384 512 640 768 896 1024 1152; do \
+		if [ ! -f output_dslash_$${Z}_$${T}_gcc_k80.csv ]; then \
+			$(CC) $(CFLAGS) $(OFFLOAD_FLAG) dwf_dslash_4_driver.cpp -DLZ=$${Z} -DLT=$${T} -o dslash_$${Z}_$${T}_gcc_k80.out; \
+			./dslash_$${Z}_$${T}_gcc_k80.out; \
+		fi; \
+	done; done;
+
+p100: dwf_dslash_4_driver.cpp
+	for Z in 16 128 256 384 512 640 768 896 1024 1152; do \
+	for T in 16 128 256 384 512 640 768 896 1024 1152; do \
+		if [ ! -f output_dslash_$${Z}_$${T}_gcc_p100.csv ]; then \
+			$(CC) $(CFLAGS) $(OFFLOAD_FLAG) dwf_dslash_4_driver.cpp -DLZ=$${Z} -DLT=$${T} -o dslash_$${Z}_$${T}_gcc_p100.out; \
+			./dslash_$${Z}_$${T}_gcc_p100.out; \
+		fi; \
+	done; done;
+
+v100: dwf_dslash_4_driver.cpp
+	for Z in 16 128 256 384 512 640 768 896 1024 1152; do \
+	for T in 16 128 256 384 512 640 768 896 1024 1152; do \
+		if [ ! -f output_dslash_$${Z}_$${T}_gcc_v100.csv ]; then \
+			$(CC) $(CFLAGS) $(OFFLOAD_FLAG) dwf_dslash_4_driver.cpp -DLZ=$${Z} -DLT=$${T} -o dslash_$${Z}_$${T}_gcc_v100.out; \
+			./dslash_$${Z}_$${T}_gcc_v100.out; \
+		fi; \
+	done; done;
+
+rtx: dwf_dslash_4_driver.cpp
+	for Z in 16 128 256 384 512 640 768 896 1024 1152; do \
+	for T in 16 128 256 384 512 640 768 896 1024 1152; do \
+		if [ ! -f output_dslash_$${Z}_$${T}_gcc_rtx.csv ]; then \
+			$(CC) $(CFLAGS) $(OFFLOAD_FLAG) dwf_dslash_4_driver.cpp -DLZ=$${Z} -DLT=$${T} -o dslash_$${Z}_$${T}_gcc_rtx.out; \
+			./dslash_$${Z}_$${T}_gcc_rtx.out; \
+		fi; \
+	done; done;
+
+clean:
+	$(RM) dslash*_gcc_rtx.out
