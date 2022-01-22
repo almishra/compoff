@@ -1,0 +1,101 @@
+CXX=clang++
+CUDA_TOOLKIT_ROOT_DIR=/cm/shared/apps/cuda10.0/toolkit/10.0.130
+CFLAGS=-O3 -fopenmp
+GPU_FLAGS=-fopenmp-targets=nvptx64 --cuda-path=$(CUDA_TOOLKIT_ROOT_DIR)
+
+all: k80 p100 v100 rtx
+
+k80: compute.cpp
+	for (( N1=5000; N1<=65000; N1+=2500 )); do \
+	for (( N2=5000; N2<=65000; N2+=2500 )); do \
+		if [ ! -f output_compute_$${N1}_$${N2}_clang_k80.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -o compute_$${N1}_$${N2}_int_clang_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -o compute_$${N1}_$${N2}_long_clang_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -o compute_$${N1}_$${N2}_float_clang_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -o compute_$${N1}_$${N2}_double_clang_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -DMEMCPY -o compute_$${N1}_$${N2}_int_memcpy_clang_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -DMEMCPY -o compute_$${N1}_$${N2}_long_memcpy_clang_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -DMEMCPY -o compute_$${N1}_$${N2}_float_memcpy_clang_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -DMEMCPY -o compute_$${N1}_$${N2}_double_memcpy_clang_k80.out; \
+			./compute_$${N1}_$${N2}_int_clang_k80.out || break; \
+			./compute_$${N1}_$${N2}_long_clang_k80.out || break; \
+			./compute_$${N1}_$${N2}_float_clang_k80.out || break; \
+			./compute_$${N1}_$${N2}_double_clang_k80.out || break; \
+			./compute_$${N1}_$${N2}_int_memcpy_clang_k80.out || break; \
+			./compute_$${N1}_$${N2}_long_memcpy_clang_k80.out || break; \
+			./compute_$${N1}_$${N2}_float_memcpy_clang_k80.out || break; \
+			./compute_$${N1}_$${N2}_double_memcpy_clang_k80.out || break; \
+		fi; \
+	done; done;
+
+p100: compute.cpp
+	for (( N1=5000; N1<=65000; N1+=2500 )); do \
+	for (( N2=5000; N2<=65000; N2+=2500 )); do \
+		if [ ! -f output_compute_$${N1}_$${N2}_clang_p100.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -o compute_$${N1}_$${N2}_int_clang_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -o compute_$${N1}_$${N2}_long_clang_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -o compute_$${N1}_$${N2}_float_clang_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -o compute_$${N1}_$${N2}_double_clang_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -DMEMCPY -o compute_$${N1}_$${N2}_int_memcpy_clang_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -DMEMCPY -o compute_$${N1}_$${N2}_long_memcpy_clang_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -DMEMCPY -o compute_$${N1}_$${N2}_float_memcpy_clang_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -DMEMCPY -o compute_$${N1}_$${N2}_double_memcpy_clang_p100.out; \
+			./compute_$${N1}_$${N2}_int_clang_p100.out || break; \
+			./compute_$${N1}_$${N2}_long_clang_p100.out || break; \
+			./compute_$${N1}_$${N2}_float_clang_p100.out || break; \
+			./compute_$${N1}_$${N2}_double_clang_p100.out || break; \
+			./compute_$${N1}_$${N2}_int_memcpy_clang_p100.out || break; \
+			./compute_$${N1}_$${N2}_long_memcpy_clang_p100.out || break; \
+			./compute_$${N1}_$${N2}_float_memcpy_clang_p100.out || break; \
+			./compute_$${N1}_$${N2}_double_memcpy_clang_p100.out || break; \
+		fi; \
+	done; done;
+
+v100: compute.cpp
+	for (( N1=5000; N1<=65000; N1+=2500 )); do \
+	for (( N2=5000; N2<=65000; N2+=2500 )); do \
+		if [ ! -f output_compute_$${N1}_$${N2}_clang_v100.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -o compute_$${N1}_$${N2}_int_clang_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -o compute_$${N1}_$${N2}_long_clang_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -o compute_$${N1}_$${N2}_float_clang_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -o compute_$${N1}_$${N2}_double_clang_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -DMEMCPY -o compute_$${N1}_$${N2}_int_memcpy_clang_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -DMEMCPY -o compute_$${N1}_$${N2}_long_memcpy_clang_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -DMEMCPY -o compute_$${N1}_$${N2}_float_memcpy_clang_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -DMEMCPY -o compute_$${N1}_$${N2}_double_memcpy_clang_v100.out; \
+			./compute_$${N1}_$${N2}_int_clang_v100.out || break; \
+			./compute_$${N1}_$${N2}_long_clang_v100.out || break; \
+			./compute_$${N1}_$${N2}_float_clang_v100.out || break; \
+			./compute_$${N1}_$${N2}_double_clang_v100.out || break; \
+			./compute_$${N1}_$${N2}_int_memcpy_clang_v100.out || break; \
+			./compute_$${N1}_$${N2}_long_memcpy_clang_v100.out || break; \
+			./compute_$${N1}_$${N2}_float_memcpy_clang_v100.out || break; \
+			./compute_$${N1}_$${N2}_double_memcpy_clang_v100.out || break; \
+		fi; \
+	done; done;
+
+rtx: compute.cpp
+	for (( N1=5000; N1<=65000; N1+=2500 )); do \
+	for (( N2=5000; N2<=65000; N2+=2500 )); do \
+		if [ ! -f output_compute_$${N1}_$${N2}_clang_rtx.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -o compute_$${N1}_$${N2}_int_clang_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -o compute_$${N1}_$${N2}_long_clang_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -o compute_$${N1}_$${N2}_float_clang_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -o compute_$${N1}_$${N2}_double_clang_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -DMEMCPY -o compute_$${N1}_$${N2}_int_memcpy_clang_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -DMEMCPY -o compute_$${N1}_$${N2}_long_memcpy_clang_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -DMEMCPY -o compute_$${N1}_$${N2}_float_memcpy_clang_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -DMEMCPY -o compute_$${N1}_$${N2}_double_memcpy_clang_rtx.out; \
+			./compute_$${N1}_$${N2}_int_clang_rtx.out || break; \
+			./compute_$${N1}_$${N2}_long_clang_rtx.out || break; \
+			./compute_$${N1}_$${N2}_float_clang_rtx.out || break; \
+			./compute_$${N1}_$${N2}_double_clang_rtx.out || break; \
+			./compute_$${N1}_$${N2}_int_memcpy_clang_rtx.out || break; \
+			./compute_$${N1}_$${N2}_long_memcpy_clang_rtx.out || break; \
+			./compute_$${N1}_$${N2}_float_memcpy_clang_rtx.out || break; \
+			./compute_$${N1}_$${N2}_double_memcpy_clang_rtx.out || break; \
+		fi; \
+	done; done;
+
+clean:
+	$(RM) compute*clang*.out 

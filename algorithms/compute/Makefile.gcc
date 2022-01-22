@@ -1,0 +1,101 @@
+CFLAGS = -Wall -O3 -fopenmp
+OFFLOAD_FLAG = -foffload=nvptx-none
+CC=gcc
+CXX=g++
+
+all: k80 p100 v100 rtx
+
+k80: compute.cpp
+	for (( N1=10000; N1<=100000; N1+=10000 )); do \
+	for (( N2=10000; N2<=100000; N2+=10000 )); do \
+		if [ ! -f output_compute_$${N1}_$${N2}_gcc_k80.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -o compute_$${N1}_$${N2}_int_gcc_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -o compute_$${N1}_$${N2}_long_gcc_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -o compute_$${N1}_$${N2}_float_gcc_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -o compute_$${N1}_$${N2}_double_gcc_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -DMEMCPY -o compute_$${N1}_$${N2}_int_memcpy_gcc_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -DMEMCPY -o compute_$${N1}_$${N2}_long_memcpy_gcc_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -DMEMCPY -o compute_$${N1}_$${N2}_float_memcpy_gcc_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -DMEMCPY -o compute_$${N1}_$${N2}_double_memcpy_gcc_k80.out; \
+			./compute_$${N1}_$${N2}_int_gcc_k80.out > output_compute_$${N1}_$${N2}_int_gcc_k80.csv; \
+			./compute_$${N1}_$${N2}_long_gcc_k80.out > output_compute_$${N1}_$${N2}_long_gcc_k80.csv; \
+			./compute_$${N1}_$${N2}_float_gcc_k80.out > output_compute_$${N1}_$${N2}_float_gcc_k80.csv; \
+			./compute_$${N1}_$${N2}_double_gcc_k80.out > output_compute_$${N1}_$${N2}_double_gcc_k80.csv; \
+			./compute_$${N1}_$${N2}_int_memcpy_gcc_k80.out > output_compute_$${N1}_$${N2}_int_memcpy_gcc_k80.csv; \
+			./compute_$${N1}_$${N2}_long_memcpy_gcc_k80.out > output_compute_$${N1}_$${N2}_long_memcpy_gcc_k80.csv; \
+			./compute_$${N1}_$${N2}_float_memcpy_gcc_k80.out > output_compute_$${N1}_$${N2}_float_memcpy_gcc_k80.csv; \
+			./compute_$${N1}_$${N2}_double_memcpy_gcc_k80.out > output_compute_$${N1}_$${N2}_double_memcpy_gcc_k80.csv; \
+		fi; \
+	done; done;
+
+p100: compute.cpp
+	for (( N1=10000; N1<=100000; N1+=10000 )); do \
+	for (( N2=10000; N2<=100000; N2+=10000 )); do \
+		if [ ! -f output_compute_$${N1}_$${N2}_gcc_p100.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -o compute_$${N1}_$${N2}_int_gcc_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -o compute_$${N1}_$${N2}_long_gcc_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -o compute_$${N1}_$${N2}_float_gcc_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -o compute_$${N1}_$${N2}_double_gcc_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -DMEMCPY -o compute_$${N1}_$${N2}_int_memcpy_gcc_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -DMEMCPY -o compute_$${N1}_$${N2}_long_memcpy_gcc_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -DMEMCPY -o compute_$${N1}_$${N2}_float_memcpy_gcc_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -DMEMCPY -o compute_$${N1}_$${N2}_double_memcpy_gcc_p100.out; \
+			./compute_$${N1}_$${N2}_int_gcc_p100.out > output_compute_$${N1}_$${N2}_int_gcc_p100.csv; \
+			./compute_$${N1}_$${N2}_long_gcc_p100.out > output_compute_$${N1}_$${N2}_long_gcc_p100.csv; \
+			./compute_$${N1}_$${N2}_float_gcc_p100.out > output_compute_$${N1}_$${N2}_float_gcc_p100.csv; \
+			./compute_$${N1}_$${N2}_double_gcc_p100.out > output_compute_$${N1}_$${N2}_double_gcc_p100.csv; \
+			./compute_$${N1}_$${N2}_int_memcpy_gcc_p100.out > output_compute_$${N1}_$${N2}_int_memcpy_gcc_p100.csv; \
+			./compute_$${N1}_$${N2}_long_memcpy_gcc_p100.out > output_compute_$${N1}_$${N2}_long_memcpy_gcc_p100.csv; \
+			./compute_$${N1}_$${N2}_float_memcpy_gcc_p100.out > output_compute_$${N1}_$${N2}_float_memcpy_gcc_p100.csv; \
+			./compute_$${N1}_$${N2}_double_memcpy_gcc_p100.out > output_compute_$${N1}_$${N2}_double_memcpy_gcc_p100.csv; \
+		fi; \
+	done; done;
+
+v100: compute.cpp
+	for (( N1=10000; N1<=100000; N1+=10000 )); do \
+	for (( N2=10000; N2<=100000; N2+=10000 )); do \
+		if [ ! -f output_compute_$${N1}_$${N2}_gcc_v100.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -o compute_$${N1}_$${N2}_int_gcc_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -o compute_$${N1}_$${N2}_long_gcc_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -o compute_$${N1}_$${N2}_float_gcc_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -o compute_$${N1}_$${N2}_double_gcc_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -DMEMCPY -o compute_$${N1}_$${N2}_int_memcpy_gcc_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -DMEMCPY -o compute_$${N1}_$${N2}_long_memcpy_gcc_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -DMEMCPY -o compute_$${N1}_$${N2}_float_memcpy_gcc_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -DMEMCPY -o compute_$${N1}_$${N2}_double_memcpy_gcc_v100.out; \
+			./compute_$${N1}_$${N2}_int_gcc_v100.out > output_compute_$${N1}_$${N2}_int_gcc_v100.csv; \
+			./compute_$${N1}_$${N2}_long_gcc_v100.out > output_compute_$${N1}_$${N2}_long_gcc_v100.csv; \
+			./compute_$${N1}_$${N2}_float_gcc_v100.out > output_compute_$${N1}_$${N2}_float_gcc_v100.csv; \
+			./compute_$${N1}_$${N2}_double_gcc_v100.out > output_compute_$${N1}_$${N2}_double_gcc_v100.csv; \
+			./compute_$${N1}_$${N2}_int_memcpy_gcc_v100.out > output_compute_$${N1}_$${N2}_int_memcpy_gcc_v100.csv; \
+			./compute_$${N1}_$${N2}_long_memcpy_gcc_v100.out > output_compute_$${N1}_$${N2}_long_memcpy_gcc_v100.csv; \
+			./compute_$${N1}_$${N2}_float_memcpy_gcc_v100.out > output_compute_$${N1}_$${N2}_float_memcpy_gcc_v100.csv; \
+			./compute_$${N1}_$${N2}_double_memcpy_gcc_v100.out > output_compute_$${N1}_$${N2}_double_memcpy_gcc_v100.csv; \
+		fi; \
+	done; done;
+
+rtx: compute.cpp
+	for (( N1=10000; N1<=100000; N1+=10000 )); do \
+	for (( N2=10000; N2<=100000; N2+=10000 )); do \
+		if [ ! -f output_compute_$${N1}_$${N2}_gcc_rtx.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -o compute_$${N1}_$${N2}_int_gcc_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -o compute_$${N1}_$${N2}_long_gcc_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -o compute_$${N1}_$${N2}_float_gcc_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -o compute_$${N1}_$${N2}_double_gcc_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -DMEMCPY -o compute_$${N1}_$${N2}_int_memcpy_gcc_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -DMEMCPY -o compute_$${N1}_$${N2}_long_memcpy_gcc_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -DMEMCPY -o compute_$${N1}_$${N2}_float_memcpy_gcc_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=double -DMEMCPY -o compute_$${N1}_$${N2}_double_memcpy_gcc_rtx.out; \
+			./compute_$${N1}_$${N2}_int_gcc_rtx.out > output_compute_$${N1}_$${N2}_int_gcc_rtx.csv; \
+			./compute_$${N1}_$${N2}_long_gcc_rtx.out > output_compute_$${N1}_$${N2}_long_gcc_rtx.csv; \
+			./compute_$${N1}_$${N2}_float_gcc_rtx.out > output_compute_$${N1}_$${N2}_float_gcc_rtx.csv; \
+			./compute_$${N1}_$${N2}_double_gcc_rtx.out > output_compute_$${N1}_$${N2}_double_gcc_rtx.csv; \
+			./compute_$${N1}_$${N2}_int_memcpy_gcc_rtx.out > output_compute_$${N1}_$${N2}_int_memcpy_gcc_rtx.csv; \
+			./compute_$${N1}_$${N2}_long_memcpy_gcc_rtx.out > output_compute_$${N1}_$${N2}_long_memcpy_gcc_rtx.csv; \
+			./compute_$${N1}_$${N2}_float_memcpy_gcc_rtx.out > output_compute_$${N1}_$${N2}_float_memcpy_gcc_rtx.csv; \
+			./compute_$${N1}_$${N2}_double_memcpy_gcc_rtx.out > output_compute_$${N1}_$${N2}_double_memcpy_gcc_rtx.csv; \
+		fi; \
+	done; done;
+
+clean:
+	$(RM) compute*gcc*.out 
