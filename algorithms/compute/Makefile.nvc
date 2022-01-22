@@ -6,9 +6,9 @@ CXX=nvc++
 all: v100 rtx
 
 v100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
-	for Z in 16 128 256 384 512 640 768 896 1024 1152; do \
-	for T in 16 128 256 384 512 640 768 896 1024 1152; do \
-		if [ ! -f output_dslash_$${Z}_$${T}_nvc_v100.csv ]; then \
+	for (( N1=5000; N1<=65000; N1+=2500 )); do \
+	for (( N2=5000; N2<=65000; N2+=2500 )); do \
+		if [ ! -f output_compute_$${N1}_$${N2}_int_nvc_v100.csv ]; then \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -o compute_$${N1}_$${N2}_int_nvc_v100.out; \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -o compute_$${N1}_$${N2}_long_nvc_v100.out; \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -o compute_$${N1}_$${N2}_float_nvc_v100.out; \
@@ -29,9 +29,9 @@ v100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
 	done; done;
 
 rtx: dwf_dslash_4_driver.cpp cps_driver.h timing.h
-	for Z in 16 128 256 384 512 640 768 896 1024 1152; do \
-	for T in 16 128 256 384 512 640 768 896 1024 1152; do \
-		if [ ! -f output_dslash_$${Z}_$${T}_nvc_rtx.csv ]; then \
+	for (( N1=5000; N1<=65000; N1+=2500 )); do \
+	for (( N2=5000; N2<=65000; N2+=2500 )); do \
+		if [ ! -f output_compute_$${N1}_$${N2}_int_nvc_rtx.csv ]; then \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=int -o compute_$${N1}_$${N2}_int_nvc_rtx.out; \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=long -o compute_$${N1}_$${N2}_long_nvc_rtx.out; \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) compute.cpp -DN1=$${N1} -DN2=$${N2} -DTYPE=float -o compute_$${N1}_$${N2}_float_nvc_rtx.out; \
