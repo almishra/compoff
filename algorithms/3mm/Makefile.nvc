@@ -1,0 +1,14 @@
+CFLAGS = -Wall -O0
+OFFLOAD_FLAG = -mp=gpu
+CC=nvc
+
+all: v100 rtx
+
+v100: matrix_multiply.c
+	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -gpu=cc70 matrix_multiply.c -o matrix_multiply_nvc_v100.out
+
+rtx: matrix_multiply.c
+	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -gpu=cc75 matrix_multiply.c -o matrix_multiply_nvc_rtx.out
+
+clean:
+	$(RM) matrix_multiply_nvc_*.out

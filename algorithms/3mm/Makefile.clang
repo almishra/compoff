@@ -1,0 +1,25 @@
+CFLAGS = -Wall -O0 -fopenmp
+OFFLOAD_FLAG = -fopenmp-targets=nvptx64-nvidia-cuda --cuda-path=$(CUDA_TOOLKIT_ROOT_DIR)
+CC=clang
+
+all: k80 p100 v100 rtx
+
+check-env:
+ifndef CUDA_TOOLKIT_ROOT_DIR
+    $(error CUDA_TOOLKIT_ROOT_DIR is undefined. Please set CUDA_TOOLKIT_ROOT_DIR to the install location of cuda.)
+endif
+
+k80: matrix_multiply.c
+	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_37 matrix_multiply.c -o matrix_multiply_clang_k80.out
+
+p100: matrix_multiply.c
+	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_60 matrix_multiply.c -o matrix_multiply_clang_p100.out
+
+v100: matrix_multiply.c
+	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_70 matrix_multiply.c -o matrix_multiply_clang_v100.out
+
+rtx: matrix_multiply.c
+	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_75 matrix_multiply.c -o matrix_multiply_clang_rtx.out
+
+clean:
+	$(RM) matrix_multiply_clang_*.out
