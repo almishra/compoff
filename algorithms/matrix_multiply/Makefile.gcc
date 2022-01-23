@@ -10,7 +10,7 @@ k80: matrix_multiply.cpp
   for (( N3=100; N3<=7000; N3+=1000 )); do \
     if [ ! -f output_matrix_multiply_$${N1}_$${N2}_$${N3}_int_gcc_k80.csv ]; then \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_gcc_k80.out; \
-      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_$${N3}_gcc_k80.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_gcc_k80.out; \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_gcc_k80.out; \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_memcpy_gcc_k80.out; \
       ./matrix_multiply_$${N1}_$${N2}_$${N3}_int_gcc_k80.out || break; \
@@ -26,7 +26,7 @@ p100: matrix_multiply.cpp
   for (( N3=100; N3<=7000; N3+=1000 )); do \
     if [ ! -f output_matrix_multiply_$${N1}_$${N2}_$${N3}_int_gcc_p100.csv ]; then \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_gcc_p100.out; \
-      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_$${N3}_gcc_p100.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_gcc_p100.out; \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_gcc_p100.out; \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_memcpy_gcc_p100.out; \
       ./matrix_multiply_$${N1}_$${N2}_$${N3}_int_gcc_p100.out || break; \
@@ -42,7 +42,7 @@ v100: matrix_multiply.cpp
   for (( N3=100; N3<=7000; N3+=1000 )); do \
     if [ ! -f output_matrix_multiply_$${N1}_$${N2}_$${N3}_int_gcc_v100.csv ]; then \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_gcc_v100.out; \
-      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_$${N3}_gcc_v100.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_gcc_v100.out; \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_gcc_v100.out; \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_memcpy_gcc_v100.out; \
       ./matrix_multiply_$${N1}_$${N2}_$${N3}_int_gcc_v100.out || break; \
@@ -58,7 +58,7 @@ rtx: matrix_multiply.cpp
   for (( N3=100; N3<=7000; N3+=1000 )); do \
     if [ ! -f output_matrix_multiply_$${N1}_$${N2}_$${N3}_int_gcc_rtx.csv ]; then \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_gcc_rtx.out; \
-      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_$${N3}_gcc_rtx.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_gcc_rtx.out; \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_gcc_rtx.out; \
       $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_memcpy_gcc_rtx.out; \
       ./matrix_multiply_$${N1}_$${N2}_$${N3}_int_gcc_rtx.out || break; \
