@@ -1,6 +1,6 @@
 CFLAGS = -Wall -O0
 OFFLOAD_FLAG = -mp=gpu
-CC=nvc
+CXX=nvc
 
 all: v100 rtx
 
@@ -21,7 +21,6 @@ v100: matrix_multiply.c
   done; done; done;
 
 rtx: matrix_multiply.c
-	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_75 matrix_multiply.c -o matrix_multiply_nvc_rtx.out
 	for (( N1=100; N1<=7000; N1+=1000 )); do \
   for (( N2=100; N2<=7000; N2+=1000 )); do \
   for (( N3=100; N3<=7000; N3+=1000 )); do \

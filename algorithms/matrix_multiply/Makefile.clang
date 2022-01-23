@@ -1,6 +1,6 @@
 CFLAGS = -Wall -O0 -fopenmp
 OFFLOAD_FLAG = -fopenmp-targets=nvptx64-nvidia-cuda --cuda-path=$(CUDA_TOOLKIT_ROOT_DIR)
-CC=clang
+CXX=clang++
 
 all: k80 p100 v100 rtx
 
