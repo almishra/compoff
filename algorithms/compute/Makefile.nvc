@@ -1,11 +1,11 @@
-CFLAGS = -Wall -O3
-GPU_FLAGS = -mp=gpu
+CFLAGS=-Wall -O3
+GPU_FLAGS=-mp=gpu
 CC=nvc
 CXX=nvc++
 
 all: v100 rtx
 
-v100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+v100: compute.cpp
 	for (( N1=5000; N1<=65000; N1+=2500 )); do \
 	for (( N2=5000; N2<=65000; N2+=2500 )); do \
 		if [ ! -f output_compute_$${N1}_$${N2}_int_nvc_v100.csv ]; then \
@@ -28,7 +28,7 @@ v100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
 		fi; \
 	done; done;
 
-rtx: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+rtx: compute.cpp
 	for (( N1=5000; N1<=65000; N1+=2500 )); do \
 	for (( N2=5000; N2<=65000; N2+=2500 )); do \
 		if [ ! -f output_compute_$${N1}_$${N2}_int_nvc_rtx.csv ]; then \
