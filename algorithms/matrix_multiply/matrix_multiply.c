@@ -2,180 +2,291 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <omp.h>
-#include <string.h>
-#include "cuda_runtime.h"
+#include <string>
+#include <typeinfo>                                                             
 
-#ifndef M
-#define M 100
+
+#define N 3000
+#ifndef TYPE
+#define TYPE float
 #endif
 
-#ifndef N
-#define N 300
+#ifndef N1
+#define N1 1000
 #endif
 
-#ifndef O
-#define O 200
+#ifndef N2
+#define N2 100
 #endif
+
+#ifndef N3
+#define N3 1000
+#endif
+
+std::string type;
+long mem_to;
+long mem_from;
+static FILE *fp;
+
+long get_time()
+{
+  struct timeval  tv;
+  gettimeofday(&tv, NULL);
+  return (long)(tv.tv_sec * 1000000 + tv.tv_usec);
+}
+
+void multiply(TYPE (*A)[N2], TYPE (*B)[N3], TYPE (*C)[N3])
+{
+  long start = get_time();
+#pragma omp parallel for
+  for(int i=0; i<N1; i++) {
+    for(int j=0; j<N2; j++) {
+      double sum = 0.0;
+      for (int k = 0; k < N3; k++)
+        sum = sum + A[i][k] * B[k][j];
+      C[i][j] = sum;
+    }
+  }
+  long end = get_time();
+  fprintf(fp, "matrix_mult_%s,0,0,%d,%d,%d,%ld\n", type.c_str(), N1, N2, N3, end - start);
+}
+
+void multiply_combine(TYPE (*A)[N2], TYPE (*B)[N3], TYPE (*C)[N3])
+{
+#ifdef MEMCPY
+  mem_to = sizeof(TYPE)*N1*N2 + sizeof(TYPE)*N2*N3;
+  mem_from = sizeof(TYPE)*N1*N3;
+#else
+  mem_to = 0;
+  mem_from = 0;
+#endif
+  long start = get_time();
+#ifdef MEMCPY
+#pragma omp target enter data map(to: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(alloc: C[0:N1][0:N3])
+#endif
+#pragma omp target teams distribute parallel for
+  for(int i=0; i<N1; i++) {
+    for(int j=0; j<N2; j++) {
+      double sum = 0.0;
+      for (int k = 0; k < N3; k++)
+        sum = sum + A[i][k] * B[k][j];
+      C[i][j] = sum;
+    }
+  }
+#ifdef MEMCPY
+#pragma omp target exit data map(delete: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(from: C[0:N1][0:N3])
+#endif
+  long end = get_time();
+  fprintf(fp, "matrix_mult_combine_%s,0,0,%d,%d,%d,%ld\n", type.c_str(), N1, N2, N3, end - start);
+}
+
+void multiply_split(TYPE (*A)[N2], TYPE (*B)[N3], TYPE (*C)[N3])
+{
+#ifdef MEMCPY
+  mem_to = sizeof(TYPE)*N1*N2 + sizeof(TYPE)*N2*N3;
+  mem_from = sizeof(TYPE)*N1*N3;
+#else   
+  mem_to = 0;
+  mem_from = 0;
+#endif
+  long start = get_time();
+#ifdef MEMCPY
+#pragma omp target enter data map(to: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(alloc: C[0:N1][0:N3])
+#endif
+#pragma omp target teams distribute
+  for(int i=0; i<N1; i++) {
+#pragma omp parallel for
+    for(int j=0; j<N2; j++) {
+      double sum = 0.0;
+      for (int k = 0; k < N3; k++)
+        sum = sum + A[i][k] * B[k][j];
+      C[i][j] = sum;
+    }
+  }
+#ifdef MEMCPY
+#pragma omp target exit data map(delete: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(from: C[0:N1][0:N3])
+#endif
+  long end = get_time();
+  fprintf(fp, "matrix_mult_split_%s,0,0,%d,%d,%d,%ld\n", type.c_str(), N1, N2, N3, end - start);
+}
+
+void multiply_collapse(TYPE (*A)[N2], TYPE (*B)[N3], TYPE (*C)[N3])
+{
+#ifdef MEMCPY
+  mem_to = sizeof(TYPE)*N1*N2 + sizeof(TYPE)*N2*N3;
+  mem_from = sizeof(TYPE)*N1*N3;
+#else   
+  mem_to = 0;
+  mem_from = 0;
+#endif
+  long start = get_time();
+#ifdef MEMCPY
+#pragma omp target enter data map(to: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(alloc: C[0:N1][0:N3])
+#endif
+#pragma omp target teams distribute parallel for collapse(2)
+  for(int i=0; i<N1; i++) {
+    for(int j=0; j<N2; j++) {
+      double sum = 0.0;
+      for (int k = 0; k < N3; k++)
+        sum = sum + A[i][k] * B[k][j];
+      C[i][j] = sum;
+    }
+  }
+#ifdef MEMCPY
+#pragma omp target exit data map(delete: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(from: C[0:N1][0:N3])
+#endif
+  long end = get_time();
+  fprintf(fp, "matrix_mult_collapse_%s,0,0,%d,%d,%d,%ld\n", type.c_str(), N1, N2, N3, end - start);
+}
+
+void multiply_combine_swap(TYPE (*A)[N2], TYPE (*B)[N3], TYPE (*C)[N3]) 
+{
+#ifdef MEMCPY
+  mem_to = sizeof(TYPE)*N1*N2 + sizeof(TYPE)*N2*N3;
+  mem_from = sizeof(TYPE)*N1*N3;
+#else   
+  mem_to = 0;
+  mem_from = 0;
+#endif
+  long start = get_time();
+#ifdef MEMCPY
+#pragma omp target enter data map(to: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(alloc: C[0:N1][0:N3])
+#endif
+#pragma omp target teams distribute parallel for
+  for(int j=0; j<N2; j++) {
+    for(int i=0; i<N1; i++) {
+      double sum = 0.0;
+      for (int k = 0; k < N3; k++)
+        sum = sum + A[i][k] * B[k][j];
+      C[i][j] = sum;
+    }
+  }
+#ifdef MEMCPY
+#pragma omp target exit data map(delete: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(from: C[0:N1][0:N3])
+#endif
+  long end = get_time();
+  fprintf(fp, "matrix_mult_combine_swap_%s,0,0,%d,%d,%d,%ld\n", type.c_str(), N1, N2, N3, end - start);
+}
+
+void multiply_split_swap(TYPE (*A)[N2], TYPE (*B)[N3], TYPE (*C)[N3])
+{
+#ifdef MEMCPY
+  mem_to = sizeof(TYPE)*N1*N2 + sizeof(TYPE)*N2*N3;
+  mem_from = sizeof(TYPE)*N1*N3;
+#else
+  mem_to = 0;
+  mem_from = 0;
+#endif
+  long start = get_time();
+#ifdef MEMCPY
+#pragma omp target enter data map(to: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(alloc: C[0:N1][0:N3])
+#endif
+#pragma omp target teams distribute
+  for(int j=0; j<N2; j++) {
+#pragma omp parallel for
+    for(int i=0; i<N1; i++) {
+      double sum = 0.0;
+      for (int k = 0; k < N3; k++)
+        sum = sum + A[i][k] * B[k][j];
+      C[i][j] = sum;
+    }
+  }
+#ifdef MEMCPY
+#pragma omp target exit data map(delete: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(from: C[0:N1][0:N3])
+#endif
+  long end = get_time();
+  fprintf(fp, "matrix_mult_split_swap_%s,0,0,%d,%d,%d,%ld\n", type.c_str(), N1, N2, N3, end - start);
+}
+
+void multiply_collapse_swap(TYPE (*A)[N2], TYPE (*B)[N3], TYPE (*C)[N3])
+{
+#ifdef MEMCPY
+  mem_to = sizeof(TYPE)*N1*N2 + sizeof(TYPE)*N2*N3;
+  mem_from = sizeof(TYPE)*N1*N3;
+#else   
+  mem_to = 0;
+  mem_from = 0;
+#endif
+  long start = get_time();
+#ifdef MEMCPY
+#pragma omp target enter data map(to: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(alloc: C[0:N1][0:N3])
+#endif
+#pragma omp target teams distribute parallel for collapse(2)
+  for(int j=0; j<N2; j++) {
+    for(int i=0; i<N1; i++) {
+      double sum = 0.0;
+      for (int k = 0; k < N3; k++)
+        sum = sum + A[i][k] * B[k][j];
+      C[i][j] = sum;
+    }
+  }
+#ifdef MEMCPY
+#pragma omp target exit data map(delete: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(from: C[0:N1][0:N3])
+#endif
+  long end = get_time();
+  fprintf(fp, "matrix_mult_collapse_%s,0,0,%d,%d,%d,%ld\n", type.c_str(), N1, N2, N3, end - start);
+}
 
 int main(int argc, char **argv)
 {
-  double *A = (double*) malloc(sizeof(double)*M*N);
-  double *B = (double*) malloc(sizeof(double)*N*O);
-  double *C = (double*) malloc(sizeof(double)*M*O);
-  struct timeval  tv1, tv2;
-  int runtime;
-  int dev = 0;
-  if(argc > 1)
-    dev = atoi(argv[1]);
-
-#pragma omp parallel for
-  for (int i = 0; i < M; i++) 
-    for (int j = 0; j < N; j++) {
-      A[i*N + j] = rand() % 10;
-    }
-  fflush(stdout);
-
-#pragma omp parallel for
-  for (int i = 0; i < N; i++) 
-    for (int j = 0; j < O; j++) {
-      B[i*O + j] = rand() % 10;
-    }
-  fflush(stdout);
-
-#pragma omp target device(dev)
-  { }
-
-  gettimeofday(&tv1, NULL);
-#pragma omp parallel for
-  for (int i = 0; i < M; i++) {
-    for (int j = 0; j < O; j++) {
-      double sum = 0.0;
-      for (int k = 0; k < N; k++)
-        sum = sum + A[i * N + k] * B[k * O + j];
-      C[i * O + j] = sum;
-    }
+  std::string output_file_name;
+  if(argc > 1) {
+    output_file_name = argv[1];
+  } else {
+    output_file_name = argv[0];
+    output_file_name = output_file_name.substr(output_file_name.find_last_of("/\\")+1);
+    output_file_name = output_file_name.substr(0, output_file_name.size() - 3);
+    output_file_name = "output_" + output_file_name + "csv";
   }
-  gettimeofday(&tv2, NULL);
-  runtime = (tv2.tv_sec - tv1.tv_sec) * 1000000;
-  runtime += tv2.tv_usec - tv1.tv_usec;
-  printf("CPU,%d,%0.4f\n", runtime, (double)(runtime/1000000.0));
-  fflush(stdout);
 
-  printf("Kernel,Outer,Inner,Reduction,VarDecl,refExpr,intLiteral,floatLiteral,mem_to,mem_from,add_sub_int,add_sub_double,mul_int,mul_double,div_int,div_double,assign_int,assign_double,runtime_us,runtime\n");
-  fflush(stdout);
-  gettimeofday(&tv1, NULL);
-#pragma omp target teams distribute parallel for map(to:A[0:M*N], B[0:N*O]) map(from:C[0:M*O]) device(dev)
-  for (int i = 0; i < M; i++) {
-    for (int j = 0; j < O; j++) {
-      double sum = 0.0;
-      for (int k = 0; k < N; k++)
-        sum = sum + A[i * N + k] * B[k * O + j];
-      C[i * O + j] = sum;
-    }
-  }
-  gettimeofday(&tv2, NULL);
-  runtime = (tv2.tv_sec - tv1.tv_sec) * 1000000;
-  runtime += tv2.tv_usec - tv1.tv_usec;
-  printf("distribute_parallel_for_%d_%d_%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.4f\n", 
-         M, N, O, M, O, 0, 2*O*1, 10*N*O+6*O, 3*O*N+3*O+1, O, 8*M*N+8*N*O, 8*M*O, 2*O+3*N*O, N*O, 2*N*O+2*O, N*O, 0, 0, 0, 2*O+N*O,
-         runtime, (double)(runtime / 1000000.0));
-  fflush(stdout);
+  printf("%s\n", output_file_name.c_str());
+  fp = fopen(output_file_name.c_str(), "w");
+  type.assign("float");
+  if(typeid(TYPE) == typeid(int))
+    type.assign("int");
+  else if(typeid(TYPE) == typeid(long))
+    type.assign("long");
+  else if(typeid(TYPE) == typeid(float))
+    type.assign("float");
+  fprintf(fp, "Total size for %s = %0.4lf\n", type.c_str(), 3.0*sizeof(TYPE)*N1*N2/1024.0/1024.0/1024.0);
 
-  gettimeofday(&tv1, NULL);
-#pragma omp target teams distribute map(to:A[0:M*N], B[0:N*O]) map(from:C[0:M*O]) device(dev)
-  for (int i = 0; i < M; i++) {
-#pragma omp parallel for
-    for (int j = 0; j < O; j++) {
-      double sum = 0.0;
-      for (int k = 0; k < N; k++)
-        sum = sum + A[i * N + k] * B[k * O + j];
-      C[i * O + j] = sum;
-    }
-  }
-  gettimeofday(&tv2, NULL);
-  runtime = (tv2.tv_sec - tv1.tv_sec) * 1000000;
-  runtime += tv2.tv_usec - tv1.tv_usec;
-  printf("distribute_parallel_for_split_%d_%d_%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.4f\n", 
-         M, N, O, M, O, 0, 2*O*1, 10*N*O+6*O, 3*O*N+3*O+1, O, 8*M*N+8*N*O, 8*M*O, 2*O+3*N*O, N*O, 2*N*O+2*O, N*O, 0, 0, 0, 2*O+N*O,
-         runtime, (double)(runtime / 1000000.0));
-  fflush(stdout);
+  TYPE (*A)[N2] = (TYPE (*)[N2]) malloc(sizeof(TYPE)*N1*N2);
+  TYPE (*B)[N3] = (TYPE (*)[N3]) malloc(sizeof(TYPE)*N2*N3);
+  TYPE (*C)[N3] = (TYPE (*)[N3]) malloc(sizeof(TYPE)*N1*N3);
 
-  gettimeofday(&tv1, NULL);
-#pragma omp target teams distribute parallel for map(to:A[0:M*N], B[0:N*O]) map(from:C[0:M*O]) device(dev)
-  for (int j = 0; j < O; j++) {
-    for (int i = 0; i < M; i++) {
-      double sum = 0.0;
-      for (int k = 0; k < N; k++)
-        sum = sum + A[i * N + k] * B[k * O + j];
-      C[i * O + j] = sum;
-    }
-  }
-  gettimeofday(&tv2, NULL);
-  runtime = (tv2.tv_sec - tv1.tv_sec) * 1000000;
-  runtime += tv2.tv_usec - tv1.tv_usec;
-  printf("swap_distribute_parallel_for_%d_%d_%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.4f\n", 
-         M, N, O, M, O, 0, 2*O*1, 10*N*O+6*O, 3*O*N+3*O+1, O, 8*M*N+8*N*O, 8*M*O, 2*O+3*N*O, N*O, 2*N*O+2*O, N*O, 0, 0, 0, 2*O+N*O,
-         runtime, (double)(runtime / 1000000.0));
-  fflush(stdout);
+#pragma omp target enter data map(to: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(alloc: C[0:N1][0:N3])
+#pragma omp target exit data map(delete: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(from: C[0:N1][0:N3])
 
-  gettimeofday(&tv1, NULL);
-#pragma omp target teams distribute map(to:A[0:M*N], B[0:N*O]) map(from:C[0:M*O]) device(dev)
-  for (int j = 0; j < O; j++) {
-#pragma omp parallel for
-    for (int i = 0; i < M; i++) {
-      double sum = 0.0;
-      for (int k = 0; k < N; k++)
-        sum = sum + A[i * N + k] * B[k * O + j];
-      C[i * O + j] = sum;
-    }
-  }
-  gettimeofday(&tv2, NULL);
-  runtime = (tv2.tv_sec - tv1.tv_sec) * 1000000;
-  runtime += tv2.tv_usec - tv1.tv_usec;
-  printf("swap_distribute_parallel_for_split_%d_%d_%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.4f\n", 
-         M, N, O, M, O, 0, 2*O*1, 10*N*O+6*O, 3*O*N+3*O+1, O, 8*M*N+8*N*O, 8*M*O, 2*O+3*N*O, N*O, 2*N*O+2*O, N*O, 0, 0, 0, 2*O+N*O,
-         runtime, (double)(runtime / 1000000.0));
-  fflush(stdout);
+#ifndef MEMCPY
+#pragma omp target enter data map(to: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(alloc: C[0:N1][0:N3])
+#endif
+  multiply(A, B, C);
+  multiply_combine(A, B, C);
+  multiply_split(A, B, C);
+  multiply_collapse(A, B, C);
+  multiply_combine_swap(A, B, C);
+  multiply_split_swap(A, B, C);
+  multiply_collapse_swap(A, B, C);
+#ifndef MEMCPY
+#pragma omp target exit data map(delete: A[0:N1][0:N2], B[0:N2][0:N3]) \
+  map(from: C[0:N1][0:N3])
+#endif
 
-  gettimeofday(&tv1, NULL);
-#pragma omp target teams distribute parallel for collapse(2) map(to:A[0:M*N], B[0:N*O]) map(from:C[0:M*O]) device(dev)
-  for (int i = 0; i < M; i++) {
-    for (int j = 0; j < O; j++) {
-      double sum = 0.0;
-      for (int k = 0; k < N; k++)
-        sum = sum + A[i * N + k] * B[k * O + j];
-      C[i * O + j] = sum;
-    }
-  }
-  gettimeofday(&tv2, NULL);
-  runtime = (tv2.tv_sec - tv1.tv_sec) * 1000000;
-  runtime += tv2.tv_usec - tv1.tv_usec;
-  printf("distribute_parallel_for_collapse_%d_%d_%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.4f\n", 
-         M, N, O, M, O, 0, 2*O*1, 10*N*O+6*O, 3*O*N+3*O+1, O, 8*M*N+8*N*O, 8*M*O, 2*O+3*N*O, N*O, 2*N*O+2*O, N*O, 0, 0, 0, 2*O+N*O,
-         runtime, (double)(runtime / 1000000.0));
-  fflush(stdout);
-
-  gettimeofday(&tv1, NULL);
-#pragma omp target teams distribute parallel for collapse(2) map(to:A[0:M*N], B[0:N*O]) map(from:C[0:M*O]) device(dev)
-  for (int j = 0; j < O; j++) {
-    for (int i = 0; i < M; i++) {
-      double sum = 0.0;
-      for (int k = 0; k < N; k++)
-        sum = sum + A[i * N + k] * B[k * O + j];
-      C[i * O + j] = sum;
-    }
-  }
-  gettimeofday(&tv2, NULL);
-  runtime = (tv2.tv_sec - tv1.tv_sec) * 1000000;
-  runtime += tv2.tv_usec - tv1.tv_usec;
-  printf("swap_distribute_parallel_for_collapse_%d_%d_%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.4f\n", 
-         M, N, O, M, O, 0, 2*O*1, 10*N*O+6*O, 3*O*N+3*O+1, O, 8*M*N+8*N*O, 8*M*O, 2*O+3*N*O, N*O, 2*N*O+2*O, N*O, 0, 0, 0, 2*O+N*O,
-         runtime, (double)(runtime / 1000000.0));
-  fflush(stdout);
-
-  free(A);
-  free(B);
-  free(C);
   return 0;
 }
 

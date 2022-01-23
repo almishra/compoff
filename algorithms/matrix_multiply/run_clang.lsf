@@ -1,0 +1,12 @@
+#!/bin/bash
+#BSUB -W 2:00
+#BSUB -nnodes 1
+#BSUB -P csc401
+#BSUB -o run_clang.o%J
+#BSUB -J run_clang
+
+module load cuda/10.1.243 llvm/13.0.0-20210225
+export OMP_NUM_THREADS=168
+cd /gpfs/alpine/scratch/alokm/csc401/compoff/algorithms/matrix_multiply
+
+jsrun -n 1 -c 42 -g 6 -bpacked:42 make -f Makefile.clang v100

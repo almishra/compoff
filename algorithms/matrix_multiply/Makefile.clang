@@ -4,22 +4,70 @@ CC=clang
 
 all: k80 p100 v100 rtx
 
-check-env:
-ifndef CUDA_TOOLKIT_ROOT_DIR
-    $(error CUDA_TOOLKIT_ROOT_DIR is undefined. Please set CUDA_TOOLKIT_ROOT_DIR to the install location of cuda.)
-endif
-
 k80: matrix_multiply.c
-	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_37 matrix_multiply.c -o matrix_multiply_clang_k80.out
+	for (( N1=100; N1<=7000; N1+=1000 )); do \
+  for (( N2=100; N2<=7000; N2+=1000 )); do \
+  for (( N3=100; N3<=7000; N3+=1000 )); do \
+    if [ ! -f output_matrix_multiply_$${N1}_$${N2}_$${N3}_int_clang_k80.csv ]; then \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_clang_k80.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_float_$${N3}_clang_k80.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_clang_k80.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_memcpy_clang_k80.out; \
+      ./matrix_multiply_$${N1}_$${N2}_int_clang_k80.out || break; \
+      ./matrix_multiply_$${N1}_$${N2}_float_clang_k80.out || break; \
+      ./matrix_multiply_$${N1}_$${N2}_int_memcpy_clang_k80.out || break; \
+      ./matrix_multiply_$${N1}_$${N2}_float_memcpy_clang_k80.out || break; \
+    fi; \
+  done; done; done;
 
 p100: matrix_multiply.c
-	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_60 matrix_multiply.c -o matrix_multiply_clang_p100.out
+	for (( N1=100; N1<=7000; N1+=1000 )); do \
+  for (( N2=100; N2<=7000; N2+=1000 )); do \
+  for (( N3=100; N3<=7000; N3+=1000 )); do \
+    if [ ! -f output_matrix_multiply_$${N1}_$${N2}_$${N3}_int_clang_p100.csv ]; then \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_clang_p100.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_float_$${N3}_clang_p100.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_clang_p100.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_memcpy_clang_p100.out; \
+      ./matrix_multiply_$${N1}_$${N2}_int_clang_p100.out || break; \
+      ./matrix_multiply_$${N1}_$${N2}_float_clang_p100.out || break; \
+      ./matrix_multiply_$${N1}_$${N2}_int_memcpy_clang_p100.out || break; \
+      ./matrix_multiply_$${N1}_$${N2}_float_memcpy_clang_p100.out || break; \
+    fi; \
+  done; done; done;
 
 v100: matrix_multiply.c
-	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_70 matrix_multiply.c -o matrix_multiply_clang_v100.out
+	for (( N1=100; N1<=7000; N1+=1000 )); do \
+  for (( N2=100; N2<=7000; N2+=1000 )); do \
+  for (( N3=100; N3<=7000; N3+=1000 )); do \
+    if [ ! -f output_matrix_multiply_$${N1}_$${N2}_$${N3}_int_clang_v100.csv ]; then \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_clang_v100.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_float_$${N3}_clang_v100.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_clang_v100.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_memcpy_clang_v100.out; \
+      ./matrix_multiply_$${N1}_$${N2}_int_clang_v100.out || break; \
+      ./matrix_multiply_$${N1}_$${N2}_float_clang_v100.out || break; \
+      ./matrix_multiply_$${N1}_$${N2}_int_memcpy_clang_v100.out || break; \
+      ./matrix_multiply_$${N1}_$${N2}_float_memcpy_clang_v100.out || break; \
+    fi; \
+  done; done; done;
 
 rtx: matrix_multiply.c
 	$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_75 matrix_multiply.c -o matrix_multiply_clang_rtx.out
+	for (( N1=100; N1<=7000; N1+=1000 )); do \
+  for (( N2=100; N2<=7000; N2+=1000 )); do \
+  for (( N3=100; N3<=7000; N3+=1000 )); do \
+    if [ ! -f output_matrix_multiply_$${N1}_$${N2}_$${N3}_int_clang_rtx.csv ]; then \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_clang_rtx.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_float_$${N3}_clang_rtx.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_clang_rtx.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 matrix_multiply.c -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_memcpy_clang_rtx.out; \
+      ./matrix_multiply_$${N1}_$${N2}_int_clang_rtx.out || break; \
+      ./matrix_multiply_$${N1}_$${N2}_float_clang_rtx.out || break; \
+      ./matrix_multiply_$${N1}_$${N2}_int_memcpy_clang_rtx.out || break; \
+      ./matrix_multiply_$${N1}_$${N2}_float_memcpy_clang_rtx.out || break; \
+    fi; \
+  done; done; done;
 
 clean:
-	$(RM) matrix_multiply_clang_*.out
+	$(RM) matrix_multiply*_clang_*.out
