@@ -1,5 +1,5 @@
 CFLAGS = -Wall -O3 -fopenmp
-OFFLOAD_FLAG = -foffload=nvptx-none
+GPU_FLAGS = -foffload=nvptx-none
 CXX=g++
 
 all: k80 p100 v100 rtx

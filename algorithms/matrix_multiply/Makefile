@@ -20,3 +20,4 @@ rtx: matrix_multiply.c
 
 clean:
 	$(RM) matrix_multiply_*.out
+	$(RM) core.*

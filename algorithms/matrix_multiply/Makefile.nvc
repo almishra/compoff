@@ -1,6 +1,6 @@
 CFLAGS = -Wall -O0
 OFFLOAD_FLAG = -mp=gpu
-CXX=nvc
+CXX=nvc++
 
 all: v100 rtx
 
@@ -9,10 +9,10 @@ v100: matrix_multiply.cpp
   for (( N2=100; N2<=7000; N2+=1000 )); do \
   for (( N3=100; N3<=7000; N3+=1000 )); do \
     if [ ! -f output_matrix_multiply_$${N1}_$${N2}_$${N3}_int_nvc_v100.csv ]; then \
-      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_nvc_v100.out; \
-      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_nvc_v100.out; \
-      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_nvc_v100.out; \
-      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_memcpy_nvc_v100.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_nvc_v100.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_nvc_v100.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_nvc_v100.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_memcpy_nvc_v100.out; \
       ./matrix_multiply_$${N1}_$${N2}_$${N3}_int_nvc_v100.out || break; \
       ./matrix_multiply_$${N1}_$${N2}_$${N3}_float_nvc_v100.out || break; \
       ./matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_nvc_v100.out || break; \
@@ -25,10 +25,10 @@ rtx: matrix_multiply.cpp
   for (( N2=100; N2<=7000; N2+=1000 )); do \
   for (( N3=100; N3<=7000; N3+=1000 )); do \
     if [ ! -f output_matrix_multiply_$${N1}_$${N2}_$${N3}_int_nvc_rtx.csv ]; then \
-      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_nvc_rtx.out; \
-      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_nvc_rtx.out; \
-      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_nvc_rtx.out; \
-      $(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_memcpy_nvc_rtx.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_nvc_rtx.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_nvc_rtx.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=int -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_nvc_rtx.out; \
+      $(CXX) $(CFLAGS) $(GPU_FLAGS) matrix_multiply.cpp -DN1=$${N1} -DN2=$${N2} -DN3=$${N3} -DTYPE=float -DMEMCPY -o matrix_multiply_$${N1}_$${N2}_$${N3}_float_memcpy_nvc_rtx.out; \
       ./matrix_multiply_$${N1}_$${N2}_$${N3}_int_nvc_rtx.out || break; \
       ./matrix_multiply_$${N1}_$${N2}_$${N3}_float_nvc_rtx.out || break; \
       ./matrix_multiply_$${N1}_$${N2}_$${N3}_int_memcpy_nvc_rtx.out || break; \
