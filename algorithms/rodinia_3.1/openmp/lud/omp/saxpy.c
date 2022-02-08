@@ -30,7 +30,6 @@ void saxpy_omp(float* a, float* b, float* c, int matrix_dim){
     int i,j,k;
     stopwatch sw;
     stopwatch_start(&sw);
-    omp_set_num_threads(4);
     int num_threads;
     #pragma omp parallel for
     for(i=0;i<matrix_dim;i++){
