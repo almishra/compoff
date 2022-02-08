@@ -30,17 +30,22 @@ void saxpy_omp(float* a, float* b, float* c, int matrix_dim){
     int i,j,k;
     stopwatch sw;
     stopwatch_start(&sw);
+    omp_set_num_threads(4);
+    int num_threads;
     #pragma omp parallel for
     for(i=0;i<matrix_dim;i++){
+        num_threads = omp_get_num_threads();
         for(j=0;j<matrix_dim;j++){
             float totalSum = 0.0f;
-            for(k=0;k<matrix_dim;k++)
+            for(k=0;k<matrix_dim;k++){
                 totalSum+=A(i,k)*B(k,j);
+            }
             C(i,j) = totalSum;
         }
     }
     stopwatch_stop(&sw);
     printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
+    printf("Num Threads: %d\n", num_threads);
 }
 int main(int argc, char* argv[]){
     int matrix_dim = 1000;
