@@ -13,7 +13,7 @@ int main(int argc, char* argv[]){
     for(i=0;i<matrix_dim;i++){
         int ii;
         for(ii=0;ii<matrix_dim;ii++){
-            printf("%d ", mat[i*matrix_dim+ii]);
+            printf("%.6f ", mat[i*matrix_dim+ii]);
         }
         printf("\n");
     }
