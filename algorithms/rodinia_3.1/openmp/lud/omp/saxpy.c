@@ -33,6 +33,6 @@ int main(int argc, char* argv[]){
     if(ret1!=RET_SUCCESS || ret2!=RET_SUCCESS || ret3!=RET_SUCCESS){
         exit(0);
     }
-    saxpy(mat1, mat2, mat3, matrix_dim);
+    saxpy(mat1, mat2, res, matrix_dim);
     return 0;
 }
