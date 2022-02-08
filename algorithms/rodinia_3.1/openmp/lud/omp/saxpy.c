@@ -11,17 +11,19 @@
 #define C(_i,_j) c[_i*matrix_dim+_j]
 
 void saxpy(float* a, float* b, float* c, int matrix_dim){
-    int i;
+    int i,j,k;
+    stopwatch sw;
+    stopwatch_start(&sw);
     for(i=0;i<matrix_dim;i++){
-        int j;
         for(j=0;j<matrix_dim;j++){
             float totalSum = 0.0f;
-            int k;
             for(k=0;k<matrix_dim;k++)
                 totalSum+=A(i,k)*B(k,j);
             C(i,j) = totalSum;
         }
     }
+    stopwatch_stop(&sw);
+    printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
 }
 
 int main(int argc, char* argv[]){
