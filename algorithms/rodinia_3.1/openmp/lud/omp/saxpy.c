@@ -4,12 +4,11 @@
 #include "common.h"
 
 // void saxpy(float* a, float* b){
-
 // }
 int main(int argc, char* argv[]){
     int matrix_dim = 32;
     float *mat;
-    int ret = create_matrix(mat, matrix_dim);
+    int ret = create_matrix(&mat, matrix_dim);
     int i;
     for(i=0;i<matrix_dim;i++){
         int ii;
