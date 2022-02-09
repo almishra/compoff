@@ -5,6 +5,8 @@
 
 #include "common.h"
 
+#pragma offload_attribute(push, target(mic))
+
 #define a(i) vector1[i]
 #define b(i) vector2[i]
 #define c(i) res[i]
