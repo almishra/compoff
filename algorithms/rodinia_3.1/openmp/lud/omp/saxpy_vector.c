@@ -19,7 +19,7 @@ void create_vector(float** vector, int dim) {
     *vector = curr;
 }
 
-void saxpy(float* vector1, float* vector2, float* res, int size){
+void saxpy(float* vector1, float* vector2, int size){
     stopwatch sw;
     int i;
     stopwatch_start(&sw);
@@ -34,13 +34,9 @@ void saxpy(float* vector1, float* vector2, float* res, int size){
 int main(int argc, char* argv[]){
     float* vector1;
     float* vector2;
-    float* res;
     int i, vector_dim = 1000;
     create_vector(&vector1, vector_dim);
     create_vector(&vector2, vector_dim);
-    create_vector(&res, vector_dim);
-    for(i=0;i<vector_dim;i++)
-        printf("%.6f ", curr_vector[i]);
-    printf("\n");
+    saxpy(vector1, vector2, vector_dim);
     return 0;
 }
