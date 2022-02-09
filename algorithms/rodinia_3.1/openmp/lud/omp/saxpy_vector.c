@@ -3,6 +3,12 @@
 #include<stdlib.h>
 #include<unistd.h>
 
+#include "common.h"
+
+#define a(i) vector1[i]
+#define b(i) vector2[i]
+#define c(i) res[i]
+
 void create_vector(float** vector, int dim) {
     float* curr = (float*) malloc(sizeof(float)*dim);
     int i;
@@ -13,10 +19,26 @@ void create_vector(float** vector, int dim) {
     *vector = curr;
 }
 
+void saxpy(float* vector1, float* vector2, float* res, int size){
+    stopwatch sw;
+    int i;
+    stopwatch_start(&sw);
+    #pragma omp target teams distribute parallel for simd \
+        num_teams(10) map(to:vector1[0:size]) map(tofrom:vector2[0:size])
+    for(i=0;i<size;i++){
+        b(i) = a(i)*b(i);
+    }
+    stopwatch_stop(&sw);
+    printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
+}
 int main(int argc, char* argv[]){
-    float* curr_vector;
-    int i, vector_dim = 10;
-    create_vector(&curr_vector, vector_dim);
+    float* vector1;
+    float* vector2;
+    float* res;
+    int i, vector_dim = 1000;
+    create_vector(&vector1, vector_dim);
+    create_vector(&vector2, vector_dim);
+    create_vector(&res, vector_dim);
     for(i=0;i<vector_dim;i++)
         printf("%.6f ", curr_vector[i]);
     printf("\n");
