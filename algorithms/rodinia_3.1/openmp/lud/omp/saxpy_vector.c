@@ -4,8 +4,10 @@
 #include<unistd.h>
 
 #include "common.h"
-
+#ifdef OMP_OFFLOAD
 #pragma offload_attribute(push, target(mic))
+#endif
+
 
 #define a(i) vector1[i]
 #define b(i) vector2[i]
@@ -25,8 +27,10 @@ void saxpy(float* vector1, float* vector2, int size){
     stopwatch sw;
     int i;
     stopwatch_start(&sw);
+    #ifdef OMP_OFFLOAD
     #pragma omp target teams distribute parallel for simd \
         num_teams(10) map(to:vector1[0:size]) map(tofrom:vector2[0:size])
+    #endif
     for(i=0;i<size;i++){
         b(i) = a(i)*b(i);
     }
