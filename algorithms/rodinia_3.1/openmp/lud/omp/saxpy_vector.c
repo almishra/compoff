@@ -16,7 +16,7 @@ int main(int argc, char* argv[]){
     float* curr_vector;
     int i, vector_dim = 10;
     create_vector(curr_vector, vector_dim);
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for(i=0;i<10;i++)
         printf("%.6f ", curr_vector[i]);
     printf("\n");
