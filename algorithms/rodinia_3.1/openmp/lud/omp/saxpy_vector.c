@@ -16,7 +16,7 @@ void create_vector(float** vector, int dim) {
 int main(int argc, char* argv[]){
     float* curr_vector;
     int i, vector_dim = 10;
-    create_vector(curr_vector, vector_dim);
+    create_vector(&curr_vector, vector_dim);
     for(i=0;i<vector_dim;i++)
         printf("%.6f ", curr_vector[i]);
     printf("\n");
