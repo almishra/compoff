@@ -20,7 +20,7 @@ CXX             := icc
 
 # ------------  compiler flags  ------------------------------------------------  -qopt-gather-scatter-unroll=7
 DEBUG_CFLAGS    := -Wall -O0 -g
-RELEASE_CFLAGS  := -Wall -O3 -g -fp-model fast=2 -fma -offload-option,mic,compiler,"-no-opt-prefetch"
+RELEASE_CFLAGS  := -Wall -O3 -g -fp-model fast=2 -fma -qoffload-option,mic,compiler,"-no-opt-prefetch"
 COMMON_CFLAGS   := -fopenmp
 
 # ------------  compiler defs  ------------------------------------------------
