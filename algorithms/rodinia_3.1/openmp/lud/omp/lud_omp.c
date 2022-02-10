@@ -158,10 +158,7 @@ void lud_omp(float *a, int size)
     }
 
     lud_diagonal_omp(a, size, offset);
-#ifdef OMP_OFFLOAD{
-    printf("Offloading defined\n");
-}
-#endif
+#ifdef OMP_OFFLOAD
 }
 #endif
 
