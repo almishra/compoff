@@ -30,7 +30,7 @@ void saxpy(float* vector1, float* vector2, int size){
     stopwatch sw;
     int i;
     stopwatch_start(&sw);
-    // #pragma omp target map(to:vector1[0:size]) map(tofrom:vector2[0:size])
+    #pragma omp target map(to:vector1[0:size]) map(tofrom:vector2[0:size])
     #pragma omp parallel for
     for(i=0;i<size;i++){
         b(i) = a(i)*b(i);
