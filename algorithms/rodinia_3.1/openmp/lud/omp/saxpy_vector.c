@@ -1,56 +1,49 @@
-// matmul.cpp: Matrix Multiplication Example using OpenMP Offloading 
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
+#include<omp.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
 
-#define MAX 128
-int A[MAX][MAX], B[MAX][MAX], C[MAX][MAX], C_SERIAL[MAX][MAX];
+#include "common.h"
+#ifdef OMP_OFFLOAD
+#pragma offload_attribute(push, target(mic))
+#endif
 
-typedef int BOOL;
-typedef int TYPE;
+#ifdef OMP_OFFLOAD
+#pragma offload_attribute(pop)
+#endif
 
-BOOL check_result(TYPE *actual, TYPE *expected, unsigned n) {
-    for (unsigned i = 0; i < n; i++) {
-        if(actual[i] != expected[i]) {
-            printf("Value mismatch at index = %d. Expected: %d"
-                   ", Actual: %d.\n", i, expected[i], actual[i]);
-            return 0;
-        }
+#define a(i) vector1[i]
+#define b(i) vector2[i]
+#define c(i) res[i]
+
+void create_vector(float** vector, int dim) {
+    float* curr = (float*) malloc(sizeof(float)*dim);
+    int i;
+    #pragma omp parallel for shared(curr) private(i)
+    for(i=0;i<dim;i++){
+        curr[i] = ((float) rand()/(float)(RAND_MAX));
     }
-    return 1;
+    *vector = curr;
 }
 
-void __attribute__ ((noinline)) Compute()
-{
-  #pragma omp target teams distribute parallel for map(to: A, B) map(tofrom: C) \
-                                                   thread_limit(128)
-  {
-    for (int i = 0; i < MAX; i++)
-    for (int j = 0; j < MAX; j++)
-    for (int k = 0; k < MAX; k++)
-         C[i][j] += A[i][k] * B[k][j];
-  }
-}
-
-int main() {
-  for (int i = 0; i < MAX; i++)
-    for (int j = 0; j < MAX; j++) {
-      A[i][j] = i + j - 1;
-      B[i][j] = i - j + 1;
+void saxpy(float* vector1, float* vector2, int size){
+    stopwatch sw;
+    int i;
+    stopwatch_start(&sw);
+    // #pragma omp target map(to:vector1[0:size]) map(tofrom:vector2[0:size])
+    #pragma omp parallel for
+    for(i=0;i<size;i++){
+        b(i) = a(i)*b(i);
     }
-
-  for (int i = 0; i < MAX; i++)
-  for (int j = 0; j < MAX; j++)
-  for (int k = 0; k < MAX; k++)
-       C_SERIAL[i][j] += A[i][k] * B[k][j];
-
-  Compute();
-
-  if (!check_result((int*) &C[0][0], (int*) &C_SERIAL[0][0], MAX * MAX)) {
-    printf("FAILED\n");
-    return 1;
-  }
-
-  printf("PASSED\n");
-  return 0;
+    stopwatch_stop(&sw);
+    printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
+}
+int main(int argc, char* argv[]){
+    float* vector1;
+    float* vector2;
+    int i, vector_dim = 1000;
+    create_vector(&vector1, vector_dim);
+    create_vector(&vector2, vector_dim);
+    saxpy(vector1, vector2, vector_dim);
+    return 0;
 }

@@ -4,7 +4,7 @@
 extern int omp_num_threads;
 
 #define BS 16
-
+#define OP 1
 #define AA(_i,_j) a[offset*size+_i*size+_j+offset]
 #define BB(_i,_j) a[_i*size+_j]
 
@@ -158,7 +158,10 @@ void lud_omp(float *a, int size)
     }
 
     lud_diagonal_omp(a, size, offset);
-#ifdef OMP_OFFLOAD
+#ifdef OMP_OFFLOAD{
+    printf("Offloading defined\n");
+}
+#endif
 }
 #endif
 
