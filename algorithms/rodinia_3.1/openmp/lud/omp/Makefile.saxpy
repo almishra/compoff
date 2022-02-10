@@ -12,7 +12,7 @@ PROFILE        := NO
 EXECUTABLE      := saxpy
 
 # ------------  list of all source files  --------------------------------------
-SOURCES         := saxpy_vector.c ../common/common.c 
+SOURCES         := lud_omp.c lud.c ../common/common.c 
 
 # ------------  compiler  ------------------------------------------------------
 CC              := icc
