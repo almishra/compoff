@@ -25,17 +25,18 @@ void create_vector(float** vector, int dim) {
     }
     *vector = curr;
 }
-
 void saxpy(float* vector1, float* vector2, int size){
     stopwatch sw;
     int i;
+    // #pragma omp target enter data map(to:vector1[0:size]) map(to:vector2[0:size])
     stopwatch_start(&sw);
-    #pragma omp target map(to:vector1[0:size]) map(tofrom:vector2[0:size])
-    #pragma omp parallel for simd
+    #pragma omp target teams distribute parallel for \
+        map(to:vector1[0:size]) map(tofrom:vector2[0:size]) 
     for(i=0;i<size;i++){
         b(i) = a(i)*b(i);
     }
     stopwatch_stop(&sw);
+    // #pragma omp target exit data map(from:vector2[0:size])
     printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
 }
 int main(int argc, char* argv[]){
