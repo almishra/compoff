@@ -8,9 +8,9 @@ extern int omp_num_threads;
 #define AA(_i,_j) a[offset*size+_i*size+_j+offset]
 #define BB(_i,_j) a[_i*size+_j]
 
-#ifdef OMP_OFFLOAD
+// #ifdef OMP_OFFLOAD
 #pragma offload_attribute(push, target(mic))
-#endif
+// #endif
 
 void lud_diagonal_omp (float* a, int size, int offset)
 {
@@ -34,9 +34,9 @@ void lud_diagonal_omp (float* a, int size, int offset)
 
 }
 
-#ifdef OMP_OFFLOAD
+// #ifdef OMP_OFFLOAD
 #pragma offload_attribute(pop)
-#endif
+// #endif
 
 
 // implements block LU factorization 
@@ -44,17 +44,17 @@ void lud_omp(float *a, int size)
 {
     int offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter;
 
-#ifdef OMP_OFFLOAD
+//#ifdef OMP_OFFLOAD
 #pragma omp target map(to: size) map(a[0:size*size])
-#endif
+//#endif
 
-#ifdef OMP_OFFLOAD
+//#ifdef OMP_OFFLOAD
 {
     omp_set_num_threads(224);
-#else
-    printf("running OMP on host\n");
-    omp_set_num_threads(omp_num_threads);
-#endif
+//#else
+//    printf("running OMP on host\n");
+//    omp_set_num_threads(omp_num_threads);
+//#endif
     for (offset = 0; offset < size - BS ; offset += BS)
     {
         // lu factorization of left-top corner block diagonal matrix 
@@ -158,8 +158,8 @@ void lud_omp(float *a, int size)
     }
 
     lud_diagonal_omp(a, size, offset);
-#ifdef OMP_OFFLOAD
+//#ifdef OMP_OFFLOAD
 }
-#endif
+//#endif
 
 }
