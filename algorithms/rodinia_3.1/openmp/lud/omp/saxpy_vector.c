@@ -24,7 +24,7 @@ void saxpy(float* vector1, float* vector2, int size){
     // #pragma omp target enter data map(to:vector1[0:size]) map(to:vector2[0:size])
     stopwatch_start(&sw);
     #pragma omp target teams distribute parallel for \
-        map(to:vector1[0:size]) map(tofrom:vector2[0:size]) 
+        map(to:vector1[0:size]) map(tofrom:vector2[0:size]) num_teams(20)
     for(i=0;i<size;i++){
         b(i) = a(i)*b(i);
     }
