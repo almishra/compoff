@@ -4,13 +4,6 @@
 #include<unistd.h>
 
 #include "common.h"
-#ifdef OMP_OFFLOAD
-#pragma offload_attribute(push, target(mic))
-#endif
-
-#ifdef OMP_OFFLOAD
-#pragma offload_attribute(pop)
-#endif
 
 #define a(i) vector1[i]
 #define b(i) vector2[i]
