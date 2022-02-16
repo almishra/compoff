@@ -18,9 +18,9 @@ SOURCES         := lud.c lud_omp.c ../common/common.c
 CC              := clang
 CXX             := clang
 
-# ------------  compiler flags  ------------------------------------------------
+# ------------  compiler flags  ------------------------------------------------  -qopt-gather-scatter-unroll=7
 DEBUG_CFLAGS    := -Wall -O0 -g
-RELEASE_CFLAGS  := -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target -march=sm_70
+RELEASE_CFLAGS  := -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 COMMON_CFLAGS   := -fopenmp
 
 # ------------  compiler defs  ------------------------------------------------
@@ -63,13 +63,13 @@ LOCAL_INC_DIR   = ../common
 SYS_LIBS        = -lm
 
 # ------------  additional system library directories  -------------------------
-GLOBAL_LIB_DIR  = 
+GLOBAL_LIB_DIR  =
 
 # ------------  additional system libraries  -----------------------------------
 GLOBAL_LIBS     =
 
 # ------------  private library directories  -----------------------------------
-LOCAL_LIB_DIR   = /lustre/home/shmmohammed/projects/cost-model/v100/opt/llvm/lib
+LOCAL_LIB_DIR   = 
 
 # ------------  private libraries  (e.g. libxyz.a )  ---------------------------
 LOCAL_LIBS      =
@@ -89,17 +89,28 @@ BASENAMES       = $(basename $(SOURCES))
 OBJECTS         = $(addsuffix .o,$(BASENAMES))
 
 # ------------  make the executable (the default goal)  ------------------------
-$(EXECUTABLE):	$(C_SOURCES)
+$(EXECUTABLE):	$(OBJECTS)
 ifeq ($(strip $(CPP_SOURCES)),)
-	$(CC) -o $(EXECUTABLE) $(LOCAL_LIBSS) $(GLOBAL_LIBSS) $(SYS_LIBS)
+	$(CC)  -o $(EXECUTABLE) $(OBJECTS) $(LOCAL_LIBSS) $(GLOBAL_LIBSS) $(SYS_LIBS)
 else
 	$(CXX) $(ALL_LFLAGS) -o $(EXECUTABLE) $(OBJECTS) $(LOCAL_LIBSS) $(GLOBAL_LIBSS) $(SYS_LIBS)
 endif
 
+# ------------  make the objects  ----------------------------------------------
+%.o:		%.c
+				$(CC)  -c $(ALL_CFLAGS) $< -o $@
 
+%.o:		%.cc
+				$(CXX) -c $(ALL_CFLAGS) $< -o $@
+
+%.o:		%.cpp
+				$(CXX) -c $(ALL_CFLAGS) $< -o $@
+
+%.o:		%.C
+				$(CXX) -c $(ALL_CFLAGS) $< -o $@
 
 clean:
-	-rm --force $(EXECUTABLE) *~
+	-rm --force $(EXECUTABLE) $(OBJECTS) *~
 
 .PHONY: clean
 
