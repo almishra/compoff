@@ -63,13 +63,13 @@ LOCAL_INC_DIR   = ../common
 SYS_LIBS        = -lm
 
 # ------------  additional system library directories  -------------------------
-GLOBAL_LIB_DIR  = /lustre/home/shmmohammed/projects/cost-model/v100/opt/llvm/lib
+GLOBAL_LIB_DIR  = 
 
 # ------------  additional system libraries  -----------------------------------
 GLOBAL_LIBS     =
 
 # ------------  private library directories  -----------------------------------
-LOCAL_LIB_DIR   = 
+LOCAL_LIB_DIR   = /lustre/home/shmmohammed/projects/cost-model/v100/opt/llvm/lib
 
 # ------------  private libraries  (e.g. libxyz.a )  ---------------------------
 LOCAL_LIBS      =
