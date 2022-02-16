@@ -26,7 +26,7 @@ COMMON_CFLAGS   := -fopenmp
 # ------------  compiler defs  ------------------------------------------------
 DEBUG_CDEFS    := -DOMP_OFFLOAD 
 RELEASE_CDEFS  := -DOMP_OFFLOAD
-COMMON_CDEFS   := 
+COMMON_CDEFS   := -DOMP_OFFLOAD
 
 # ------------  linker flags  --------------------------------------------------
 DEBUG_LDFLAGS    := -g
