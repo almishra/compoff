@@ -24,9 +24,9 @@ RELEASE_CFLAGS  := -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 COMMON_CFLAGS   := -fopenmp
 
 # ------------  compiler defs  ------------------------------------------------
-DEBUG_CDEFS    := -DOMP_OFFLOAD 
-RELEASE_CDEFS  := -DOMP_OFFLOAD
-COMMON_CDEFS   := -DOMP_OFFLOAD
+DEBUG_CDEFS    := 
+RELEASE_CDEFS  := 
+COMMON_CDEFS   := 
 
 # ------------  linker flags  --------------------------------------------------
 DEBUG_LDFLAGS    := -g
@@ -91,14 +91,14 @@ OBJECTS         = $(addsuffix .o,$(BASENAMES))
 # ------------  make the executable (the default goal)  ------------------------
 $(EXECUTABLE):	$(OBJECTS)
 ifeq ($(strip $(CPP_SOURCES)),)
-	$(CC)  -o $(EXECUTABLE) $(OBJECTS) $(LOCAL_LIBSS) $(GLOBAL_LIBSS) $(SYS_LIBS)
+	$(CC)  -o $(EXECUTABLE) $(OBJECTS) $(LOCAL_LIBSS) $(GLOBAL_LIBSS) $(SYS_LIBS) -DOMP_OFFLOAD
 else
 	$(CXX) $(ALL_LFLAGS) -o $(EXECUTABLE) $(OBJECTS) $(LOCAL_LIBSS) $(GLOBAL_LIBSS) $(SYS_LIBS)
 endif
 
 # ------------  make the objects  ----------------------------------------------
 %.o:		%.c
-				$(CC)  -c $(ALL_CFLAGS) $< -o $@
+				$(CC)  -c $(ALL_CFLAGS) $< -o $@ -DOMP_OFFLOAD
 
 %.o:		%.cc
 				$(CXX) -c $(ALL_CFLAGS) $< -o $@
