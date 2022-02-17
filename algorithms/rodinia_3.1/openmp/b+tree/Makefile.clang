@@ -17,7 +17,7 @@ b+tree.out:	./main.o \
 			./util/timer/timer.o \
 			./util/num/num.o \
 			-lm \
-			$(OMP_LIB) \
+			$(OMP_LIB) $(OMP_FlAG)\
                         -o b+tree.out
 # ========================================================================================================================================================================================================200
 #	OBJECTS (COMPILE SOURCE FILES INTO OBJECTS)
@@ -31,7 +31,7 @@ main.o:	./common.h \
 		./main.h \
 		./main.c
 	$(C_C)	./main.c \
-			-c \
+			-c $(OMP_FlAG)\
 			-o ./main.o \
 			-O3
 
@@ -63,7 +63,7 @@ main.o:	./common.h \
 						./util/timer/timer.h \
 						./util/timer/timer.c
 	$(C_C)	./util/timer/timer.c \
-			-c \
+			-c $(OMP_FlAG) \
 			-o ./util/timer/timer.o \
 			-O3
 
@@ -71,7 +71,7 @@ main.o:	./common.h \
 					./util/num/num.h \
 					./util/num/num.c
 	$(C_C)	./util/num/num.c \
-			-c \
+			-c $(OMP_FlAG) \
 			-o ./util/num/num.o \
 			-O3
 
