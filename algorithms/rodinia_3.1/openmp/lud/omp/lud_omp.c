@@ -45,7 +45,7 @@ void lud_omp(float *a, int size)
     int offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter;
 
 #ifdef OMP_OFFLOAD
-#pragma omp target map(to: size) map(a[0:size*size],offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter)
+#pragma omp target map(to: size) map(a[0:size*size])
 #endif
 
 #ifdef OMP_OFFLOAD
