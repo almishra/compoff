@@ -9,7 +9,7 @@ extern int omp_num_threads;
 #define BB(_i,_j) a[_i*size+_j]
 
 #ifdef OMP_OFFLOAD
-//#pragma offload_attribute(push, target(mic))
+#pragma omp declare target
 #endif
 
 void lud_diagonal_omp (float* a, int size, int offset)
@@ -35,7 +35,7 @@ void lud_diagonal_omp (float* a, int size, int offset)
 }
 
 #ifdef OMP_OFFLOAD
-//#pragma offload_attribute(pop)
+#pragma end declare target
 #endif
 
 
