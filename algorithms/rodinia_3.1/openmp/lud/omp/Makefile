@@ -21,11 +21,10 @@ CXX             := clang++
 # ------------  compiler flags  ------------------------------------------------
 DEBUG_CFLAGS    := -Wall -O0 -g
 RELEASE_CFLAGS  := -Wall -O3 
-COMMON_CFLAGS   := -L$CLANG_LIB -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
-
+COMMON_CFLAGS   := -fopenmp 
 # ------------  compiler defs  ------------------------------------------------
-DEBUG_CDEFS    := 
-RELEASE_CDEFS  := 
+DEBUG_CDEFS    := -DOMP_OFFLOAD 
+RELEASE_CDEFS  := -DOMP_OFFLOAD
 COMMON_CDEFS   := 
 
 # ------------  linker flags  --------------------------------------------------
