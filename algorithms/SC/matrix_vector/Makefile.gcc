@@ -1,0 +1,47 @@
+CFLAGS = -Wall -O3 -fopenmp
+OFFLOAD_FLAG = -foffload=nvptx-none
+CC=g++
+
+ifndef A
+A = 16
+endif 
+ifndef B
+B = 16
+endif 
+ifndef C
+C = 16
+endif 
+ifndef D
+D = 16
+endif 
+ifndef E
+E = 8
+endif 
+ifndef COUNT
+COUNT = 10
+endif 
+
+all: k80 p100 v100 rtx
+
+k80: matrix_vector.cpp
+	if [ ! -f output_mv_gcc_$(A)_$(B)_$(C)_$(D)_$(E)_$(COUNT)_k80.csv ]; then \
+		$(CC) $(CFLAGS) $(OFFLOAD_FLAG) matrix_vector.cpp -DOFF -DLA=$(A) -DLB=$(B) -DLC=$(C) -DLD=$(D) -DLE=$(E) -DCOUNT=$(COUNT) -o mv_gcc_$(A)_$(B)_$(C)_$(D)_$(E)_$(COUNT)_k80.out; \
+	fi
+
+p100: matrix_vector.cpp
+	if [ ! -f output_mv_gcc_$(A)_$(B)_$(C)_$(D)_$(E)_$(COUNT)_p100.csv ]; then \
+		$(CC) $(CFLAGS) $(OFFLOAD_FLAG) matrix_vector.cpp -DOFF -DLA=$(A) -DLB=$(B) -DLC=$(C) -DLD=$(D) -DLE=$(E) -DCOUNT=$(COUNT) -o mv_gcc_$(A)_$(B)_$(C)_$(D)_$(E)_$(COUNT)_p100.out; \
+	fi
+
+v100: matrix_vector.cpp
+	if [ ! -f output_mv_gcc_$(A)_$(B)_$(C)_$(D)_$(E)_$(COUNT)_v100.csv ]; then \
+		$(CC) $(CFLAGS) $(OFFLOAD_FLAG) matrix_vector.cpp -DOFF -DLA=$(A) -DLB=$(B) -DLC=$(C) -DLD=$(D) -DLE=$(E) -DCOUNT=$(COUNT) -o mv_gcc_$(A)_$(B)_$(C)_$(D)_$(E)_$(COUNT)_v100.out; \
+	fi
+
+rtx: matrix_vector.cpp
+	if [ ! -f output_mv_gcc_$(A)_$(B)_$(C)_$(D)_$(E)_$(COUNT)_rtx.csv ]; then \
+		$(CC) $(CFLAGS) $(OFFLOAD_FLAG) matrix_vector.cpp -DOFF -DLA=$(A) -DLB=$(B) -DLC=$(C) -DLD=$(D) -DLE=$(E) -DCOUNT=$(COUNT) -o mv_gcc_$(A)_$(B)_$(C)_$(D)_$(E)_$(COUNT)_rtx.out; \
+	fi
+
+clean:
+	$(RM) mv_gcc_*.out output_mv_gcc_*.csv

@@ -1,0 +1,37 @@
+CFLAGS = -Wall -O3 
+OFFLOAD_FLAG = -mp=gpu
+CC=nvc++
+
+ifndef A
+A = 16
+endif 
+ifndef B
+B = 16
+endif 
+ifndef C
+C = 16
+endif 
+ifndef D
+D = 16
+endif 
+ifndef E
+E = 8
+endif 
+ifndef COUNT
+COUNT = 10
+endif 
+
+all: v100 rtx
+
+v100: matrix_vector.cpp
+	if [ ! -f output_mv_nvc_$(A)_$(B)_$(C)_$(D)_$(E)_$(COUNT)_v100.csv ]; then \
+		$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -gpu=cc70 matrix_vector.cpp -DOFF -DLA=$(A) -DLB=$(B) -DLC=$(C) -DLD=$(D) -DLE=$(E) -DCOUNT=$(COUNT) -o mv_nvc_$(A)_$(B)_$(C)_$(D)_$(E)_$(COUNT)_v100.out; \
+	fi
+
+rtx: matrix_vector.cpp
+	if [ ! -f output_mv_nvc_$(A)_$(B)_$(C)_$(D)_$(E)_$(COUNT)_rtx.csv ]; then \
+		$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -gpu=cc75 matrix_vector.cpp -DOFF -DLA=$(A) -DLB=$(B) -DLC=$(C) -DLD=$(D) -DLE=$(E) -DCOUNT=$(COUNT) -o mv_nvc_$(A)_$(B)_$(C)_$(D)_$(E)_$(COUNT)_rtx.out; \
+	fi
+
+clean:
+	$(RM) mv_nvc_*.out output_mv_nvc_*.csv
