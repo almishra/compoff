@@ -1,0 +1,33 @@
+CFLAGS = -Wall -O3 -fopenmp
+OFFLOAD_FLAG = -mp=gpu
+CC = nvc++
+
+ifndef X
+X = 8
+endif
+ifndef Y
+Y = 4
+endif
+ifndef Z
+Z = 4
+endif
+ifndef T
+T = 4
+endif
+
+all: v100 rtx
+
+v100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+		if [ ! -f output_dslash_rtx_$(X)_$(Y)_$(Z)_$(T)_v100.csv ]; then \
+			$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -gpu=cc70 dwf_dslash_4_driver.cpp -DLX=$(X) -DLY=$(Y) -DLZ=$(Z) -DLT=$(T) -o dslash_rtx_$(X)_$(Y)_$(Z)_$(T)_v100.out; \
+			./dslash_rtx_$(X)_$(Y)_$(Z)_$(T)_v100.out; \
+		fi; \
+
+rtx: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+		if [ ! -f output_dslash_rtx_$(X)_$(Y)_$(Z)_$(T)_rtx.csv ]; then \
+			$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -gpu=cc75 dwf_dslash_4_driver.cpp -DLX=$(X) -DLY=$(Y) -DLZ=$(Z) -DLT=$(T) -o dslash_rtx_$(X)_$(Y)_$(Z)_$(T)_rtx.out; \
+			./dslash_rtx_$(X)_$(Y)_$(Z)_$(T)_rtx.out; \
+		fi; \
+
+clean:
+	rm -rf dslash_rtx*.out output_dslash_rtx*.csv

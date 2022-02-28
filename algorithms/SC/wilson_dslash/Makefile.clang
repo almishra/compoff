@@ -1,0 +1,45 @@
+CFLAGS = -Wall -O3 -fopenmp
+OFFLOAD_FLAG = -fopenmp-targets=nvptx64
+CC = clang++
+
+ifndef X
+X = 8
+endif
+ifndef Y
+Y = 4
+endif
+ifndef Z
+Z = 4
+endif
+ifndef T
+T = 4
+endif
+
+all: k80 p100 v100 rtx
+
+k80: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+		if [ ! -f output_dslash_clang_$(X)_$(Y)_$(Z)_$(T)_k80.csv ]; then \
+			$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_37 dwf_dslash_4_driver.cpp -DLX=$(X) -DLY=$(Y) -DLZ=$(Z) -DLT=$(T) -o dslash_clang_$(X)_$(Y)_$(Z)_$(T)_k80.out; \
+			./dslash_clang_$(X)_$(Y)_$(Z)_$(T)_k80.out; \
+		fi; \
+
+p100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+		if [ ! -f output_dslash_clang_$(X)_$(Y)_$(Z)_$(T)_p100.csv ]; then \
+			$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_60 dwf_dslash_4_driver.cpp -DLX=$(X) -DLY=$(Y) -DLZ=$(Z) -DLT=$(T) -o dslash_clang_$(X)_$(Y)_$(Z)_$(T)_p100.out; \
+			./dslash_clang_$(X)_$(Y)_$(Z)_$(T)_p100.out; \
+		fi; \
+
+v100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+		if [ ! -f output_dslash_clang_$(X)_$(Y)_$(Z)_$(T)_v100.csv ]; then \
+			$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_70 dwf_dslash_4_driver.cpp -DLX=$(X) -DLY=$(Y) -DLZ=$(Z) -DLT=$(T) -o dslash_clang_$(X)_$(Y)_$(Z)_$(T)_v100.out; \
+			./dslash_clang_$(X)_$(Y)_$(Z)_$(T)_v100.out; \
+		fi; \
+
+rtx: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+		if [ ! -f output_dslash_clang_$(X)_$(Y)_$(Z)_$(T)_rtx.csv ]; then \
+			$(CC) $(CFLAGS) $(OFFLOAD_FLAG) -Xopenmp-target -march=sm_75 dwf_dslash_4_driver.cpp -DLX=$(X) -DLY=$(Y) -DLZ=$(Z) -DLT=$(T) -o dslash_clang_$(X)_$(Y)_$(Z)_$(T)_rtx.out; \
+			./dslash_clang_$(X)_$(Y)_$(Z)_$(T)_rtx.out; \
+		fi; \
+
+clean:
+	rm -rf dslash_clang*.out output_dslash_clang*.csv
