@@ -1,7 +1,7 @@
 # C compiler
 CC = clang++
 ICC = icc
-CC_FLAGS = -g -fopenmp -O3
+CC_FLAGS = -g -fopenmp -O3  -L/lustre/projects/compoff-group/opt/llvm/lib
 OFFLOAD_CC_FLAGS = -offload-option,mic,compiler,"-no-opt-prefetch"
 PLUGIN_FLAG = -Xclang -load -Xclang ~/git/unifiedmem/code/llvm-pass/build/uvm/libOMPPass.so
 
@@ -15,7 +15,7 @@ hotspot_offload: hotspot_openmp.cpp Makefile
 	$(ICC) $(CC_FLAGS) $(OFFLOAD_CC_FLAGS) -DOMP_OFFLOAD hotspot_openmp.cpp -o hotspot_offload
 
 gpu: hotspot_openmp.cpp Makefile 
-	$(CC) $(CC_FLAGS) hotspot_openmp.cpp -o hotspot_gpu -DOMP_GPU_OFFLOAD -fopenmp-targets=nvptx64-nvidia-cuda
+	$(CC) $(CC_FLAGS) hotspot_openmp.cpp -o hotspot_gpu -DOMP_GPU_OFFLOAD -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 
 um: hotspot_openmp.cpp Makefile 
 	$(CC) $(CC_FLAGS) hotspot_openmp.cpp -o hotspot_um -DOMP_GPU_OFFLOAD_UM -fopenmp-targets=nvptx64-nvidia-cuda $(PLUGIN_FLAG)
