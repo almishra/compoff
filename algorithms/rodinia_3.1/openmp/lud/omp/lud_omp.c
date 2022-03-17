@@ -4,6 +4,7 @@
 extern int omp_num_threads;
 
 #define BS 16
+#define NTEAMS 20
 #define OP 1
 #define AA(_i,_j) a[offset*size+_i*size+_j+offset]
 #define BB(_i,_j) a[_i*size+_j]
@@ -45,12 +46,13 @@ void lud_omp(float *a, int size)
     int offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter;
 
 #ifdef OMP_OFFLOAD
-#pragma omp target map(to: size) map(a[0:size*size])
+#pragma omp target teams map(to: size) map(a[0:size*size]) num_teams(NTEAMS)
 #endif
 
 #ifdef OMP_OFFLOAD
 {
-    omp_set_num_threads(224);
+    omp_set_num_threads(224); 
+#pragma omp distribute
 #else
     printf("running OMP on host\n");
     omp_set_num_threads(omp_num_threads);
