@@ -1,0 +1,39 @@
+CFLAGS=-O3
+GPU_FLAGS=-mp=gpu
+CC=nvc
+CXX=nvc++
+
+all: v100 rtx
+
+v100: dwf_dslash_4_driver_variants.cpp cps_driver.h timing.h
+	X=4; \
+	while [[ $$X -le 4 ]]; \
+	do \
+		((T=2*X)); \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_nvc_v100.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_nvc_v100.out; \
+		fi; \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_nvc_v100_memcpy.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -DMEMCPY dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_nvc_v100_memcpy.out; \
+		fi; \
+		echo $$X; \
+		((X=X+4)); \
+	done
+
+rtx: dwf_dslash_4_driver_variants.cpp cps_driver.h timing.h
+	X=4; \
+	while [[ $$X -le 64 ]]; \
+	do \
+		((T=2*X)); \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_nvc_rtx.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_nvc_rtx.out; \
+		fi; \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_nvc_rtx_memcpy.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -DMEMCPY dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_nvc_rtx_memcpy.out; \
+		fi; \
+		echo $$X; \
+		((X=X+4)); \
+	done
+
+clean:
+	$(RM) dslash*nvc*.out
