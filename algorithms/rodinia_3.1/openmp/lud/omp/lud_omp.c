@@ -49,7 +49,7 @@ void lud_omp(float *a, int size)
     stopwatch sw;
 #ifdef OMP_OFFLOAD
 #pragma omp target teams map(to: size) map(a[0:size*size]) num_teams(NTEAMS)
-printf("%d,%d",(size*(size+1))*sizeof(int), size*size*sizeof(int));
+stopwatch_start(&sw);
 #endif
 
 #ifdef OMP_OFFLOAD
@@ -164,6 +164,9 @@ printf("%d,%d",(size*(size+1))*sizeof(int), size*size*sizeof(int));
 
     lud_diagonal_omp(a, size, offset);
 #ifdef OMP_OFFLOAD
+stopwatch_stop(&sw);
+printf("%lu,%lu,%d,%d",(size*(size+1))*sizeof(int), size*size*sizeof(int), \
+                get_interval_by_usec(&sw),get_interval_by_sec(&sw));
 }
 #endif
 
