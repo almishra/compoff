@@ -47,9 +47,9 @@ void lud_omp(float *a, int size)
 {
     int offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter;
     stopwatch sw;
+    stopwatch_start(&sw);
 #ifdef OMP_OFFLOAD
 #pragma omp target teams map(to: size) map(a[0:size*size]) num_teams(NTEAMS)
-stopwatch_start(&sw);
 #endif
 
 #ifdef OMP_OFFLOAD
@@ -163,9 +163,9 @@ stopwatch_start(&sw);
     }
 
     lud_diagonal_omp(a, size, offset);
+    stopwatch_stop(&sw);
 #ifdef OMP_OFFLOAD
-stopwatch_stop(&sw);
-printf("%lu,%lu,%d,%d",(size*(size+1))*sizeof(int), size*size*sizeof(int), \
+printf("%lu,%lu,%d,%f",(size*(size+1))*sizeof(int), size*size*sizeof(int), \
                 get_interval_by_usec(&sw),get_interval_by_sec(&sw));
 }
 #endif
