@@ -1,0 +1,21 @@
+CXX=icpx
+CFLAGS= -fiopenmp -D__STRICT_ANSI__
+GPU_FLAGS=-fopenmp-targets=spir64
+
+all: intel
+
+intel: dwf_dslash_4_driver_variants.cpp cps_driver.h timing.h
+	X=4; \
+	while [ $$X -le 64 ]; \
+	do \
+		T=$$(( 2 * X )); \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_k80.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_icpx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -DMEMCPY dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_icpx_memcpy.out; \
+		fi; \
+		echo $$X; \
+		X=$$(( X + 4 )); \
+	done   
+
+clean:
+	rm -rf *icpx*.out 
