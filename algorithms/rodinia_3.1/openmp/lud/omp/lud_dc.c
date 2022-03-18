@@ -11,9 +11,9 @@ lud_omp(float *m, int matrix_dim);
 
 int main ( int argc, char *argv[]){
     int matrix_dim = 100;
-    float *m;
     printf("matrix_dim,mem_to,mem_from,runtime(us), runtime(s)");
     for(;matrix_dim<=1000;){
+        float *m;
         stopwatch sw;
         int ret = create_matrix(&m, matrix_dim);
         if (ret != RET_SUCCESS) {
