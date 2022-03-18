@@ -162,14 +162,13 @@ void lud_omp(float *a, int size)
         }
     }
 
-    lud_diagonal_omp(a, size, offset);
-    stopwatch_stop(&sw);
-    int usecs = get_interval_by_usec(&sw);
-    double secnds = get_interval_by_sec(&sw);
 #ifdef OMP_OFFLOAD
-printf("%lu,%lu,%d,%f",(size*(size+1))*sizeof(int), size*size*sizeof(int), \
-                usecs, secnds);
 }
 #endif
-
+lud_diagonal_omp(a, size, offset);
+stopwatch_stop(&sw);
+int usecs = get_interval_by_usec(&sw);
+double secnds = get_interval_by_sec(&sw);
+printf("%lu,%lu,%d,%f",(size*(size+1))*sizeof(int), size*size*sizeof(int), \
+                usecs, secnds);
 }
