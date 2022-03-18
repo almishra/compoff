@@ -9,8 +9,10 @@ intel: dwf_dslash_4_driver_variants.cpp cps_driver.h timing.h
 	while [ $$X -le 64 ]; \
 	do \
 		T=$$(( 2 * X )); \
-		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_k80.csv ]; then \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_icpx.csv ]; then \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_icpx.out; \
+		fi; \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_icpx_memcpy.csv ]; then \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) -DMEMCPY dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_icpx_memcpy.out; \
 		fi; \
 		echo $$X; \

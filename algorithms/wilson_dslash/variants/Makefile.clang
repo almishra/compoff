@@ -11,6 +11,8 @@ k80: dwf_dslash_4_driver_variants.cpp cps_driver.h timing.h
 		((T=2*X)); \
 		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_k80.csv ]; then \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_k80.out; \
+		fi; \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_k80_memcpy.csv ]; then \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) -DMEMCPY -Xopenmp-target -march=sm_37 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_k80_memcpy.out; \
 		fi; \
 		echo $$X; \
@@ -24,6 +26,8 @@ p100: dwf_dslash_4_driver_variants.cpp cps_driver.h timing.h
 		((T=2*X)); \
 		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_p100.csv ]; then \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_p100.out; \
+		fi; \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_p100_memcpy.csv ]; then \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) -DMEMCPY -Xopenmp-target -march=sm_60 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_p100_memcpy.out; \
 		fi; \
 		echo $$X; \
@@ -37,6 +41,8 @@ v100: dwf_dslash_4_driver_variants.cpp cps_driver.h timing.h
 		((T=2*X)); \
 		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_v100.csv ]; then \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_v100.out; \
+		fi; \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_v100_memcpy.csv ]; then \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) -DMEMCPY -Xopenmp-target -march=sm_70 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_v100_memcpy.out; \
 		fi; \
 		echo $$X; \
@@ -50,6 +56,8 @@ rtx: dwf_dslash_4_driver_variants.cpp cps_driver.h timing.h
 		((T=2*X)); \
 		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_rtx.csv ]; then \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_rtx.out; \
+		fi; \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_rtx_memcpy.csv ]; then \
 			$(CXX) $(CFLAGS) $(GPU_FLAGS) -DMEMCPY -Xopenmp-target -march=sm_75 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_rtx_memcpy.out; \
 		fi; \
 		echo $$X; \
