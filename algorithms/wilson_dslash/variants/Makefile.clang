@@ -1,0 +1,60 @@
+CXX=clang++
+CFLAGS= -g -O3 -fopenmp
+GPU_FLAGS=-fopenmp-targets=nvptx64 --cuda-path=$(CUDA_TOOLKIT_ROOT_DIR)
+
+all: k80 p100 v100 rtx
+
+k80: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	X=4; \
+	while [[ $$X -le 64 ]]; \
+	do \
+		((T=2*X)); \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_k80.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_37 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_k80.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -DMEMCPY -Xopenmp-target -march=sm_37 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_k80_memcpy.out; \
+		fi; \
+		echo $$X; \
+		((X=X+4)); \
+	done
+
+p100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	X=4; \
+	while [[ $$X -le 64 ]]; \
+	do \
+		((T=2*X)); \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_p100.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_60 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_p100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -DMEMCPY -Xopenmp-target -march=sm_60 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_p100_memcpy.out; \
+		fi; \
+		echo $$X; \
+		((X=X+4)); \
+	done
+
+v100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	X=4; \
+	while [[ $$X -le 64 ]]; \
+	do \
+		((T=2*X)); \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_v100.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_70 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_v100.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -DMEMCPY -Xopenmp-target -march=sm_70 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_v100_memcpy.out; \
+		fi; \
+		echo $$X; \
+		((X=X+4)); \
+	done
+
+rtx: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+	X=4; \
+	while [[ $$X -le 64 ]]; \
+	do \
+		((T=2*X)); \
+		if [ ! -f output_dslash_$${X}_$${X}_$${X}_$${T}_rtx.csv ]; then \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -Xopenmp-target -march=sm_75 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_rtx.out; \
+			$(CXX) $(CFLAGS) $(GPU_FLAGS) -DMEMCPY -Xopenmp-target -march=sm_75 dwf_dslash_4_driver_variants.cpp -DLX=$${X} -DLY=$${X} -DLZ=$${X} -DLT=$${T} -o dslash_$${X}_$${X}_$${X}_$${T}_rtx_memcpy.out; \
+		fi; \
+		echo $$X; \
+		((X=X+4)); \
+	done
+
+clean:
+	rm -rf *out 
