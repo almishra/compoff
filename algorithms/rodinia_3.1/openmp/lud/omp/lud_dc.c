@@ -21,7 +21,7 @@ int main ( int argc, char *argv[]){
             fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
         }
         // stopwatch_start(&sw);
-        // lud_omp(m, matrix_dim);
+        lud_omp(m, matrix_dim);
         // stopwatch_stop(&sw);
         // int usecs = get_interval_by_usec(&sw);
         // double secnds = get_interval_by_sec(&sw);
