@@ -4,7 +4,7 @@ GPU_FLAGS=-fopenmp-targets=nvptx64 --cuda-path=$(CUDA_TOOLKIT_ROOT_DIR)
 
 all: k80 p100 v100 rtx
 
-k80: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+k80: dwf_dslash_4_driver_variants.cpp cps_driver.h timing.h
 	X=4; \
 	while [[ $$X -le 64 ]]; \
 	do \
@@ -17,7 +17,7 @@ k80: dwf_dslash_4_driver.cpp cps_driver.h timing.h
 		((X=X+4)); \
 	done
 
-p100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+p100: dwf_dslash_4_driver_variants.cpp cps_driver.h timing.h
 	X=4; \
 	while [[ $$X -le 64 ]]; \
 	do \
@@ -30,7 +30,7 @@ p100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
 		((X=X+4)); \
 	done
 
-v100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+v100: dwf_dslash_4_driver_variants.cpp cps_driver.h timing.h
 	X=4; \
 	while [[ $$X -le 64 ]]; \
 	do \
@@ -43,7 +43,7 @@ v100: dwf_dslash_4_driver.cpp cps_driver.h timing.h
 		((X=X+4)); \
 	done
 
-rtx: dwf_dslash_4_driver.cpp cps_driver.h timing.h
+rtx: dwf_dslash_4_driver_variants.cpp cps_driver.h timing.h
 	X=4; \
 	while [[ $$X -le 64 ]]; \
 	do \
