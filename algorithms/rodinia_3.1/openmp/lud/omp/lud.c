@@ -86,37 +86,42 @@ main ( int argc, char *argv[] )
   //   exit(EXIT_FAILURE);
   // }
 
-  if (input_file) {
-    printf("Reading matrix from file %s\n", input_file);
-    ret = create_matrix_from_file(&m, input_file, &matrix_dim);
-    if (ret != RET_SUCCESS) {
-      m = NULL;
-      fprintf(stderr, "error create matrix from file %s\n", input_file);
-      exit(EXIT_FAILURE);
-    }
-  }
-  else if (matrix_dim) {
-    printf("Creating matrix internally size=%d\n", matrix_dim);
-    ret = create_matrix(&m, matrix_dim);
-    if (ret != RET_SUCCESS) {
-      m = NULL;
-      fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
-      exit(EXIT_FAILURE);
-    }
-  }
+  // if (input_file) {
+  //   printf("Reading matrix from file %s\n", input_file);
+  //   ret = create_matrix_from_file(&m, input_file, &matrix_dim);
+  //   if (ret != RET_SUCCESS) {
+  //     m = NULL;
+  //     fprintf(stderr, "error create matrix from file %s\n", input_file);
+  //     exit(EXIT_FAILURE);
+  //   }
+  // }
+  // else if (matrix_dim) {
+  //   printf("Creating matrix internally size=%d\n", matrix_dim);
+  //   ret = create_matrix(&m, matrix_dim);
+  //   if (ret != RET_SUCCESS) {
+  //     m = NULL;
+  //     fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
+  //     exit(EXIT_FAILURE);
+  //   }
+  // }
  
-  else {
-    printf("No input file specified!\n");
+  // else {
+  //   printf("No input file specified!\n");
+  //   exit(EXIT_FAILURE);
+  // } 
+
+  // if (do_verify){
+  //   printf("Before LUD\n");
+  //   /* print_matrix(m, matrix_dim); */
+  //   matrix_duplicate(m, &mm, matrix_dim);
+  // }
+
+  ret = create_matrix(&m, matrix_dim);
+  if (ret != RET_SUCCESS) {
+    m = NULL;
+    fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
     exit(EXIT_FAILURE);
-  } 
-
-  if (do_verify){
-    printf("Before LUD\n");
-    /* print_matrix(m, matrix_dim); */
-    matrix_duplicate(m, &mm, matrix_dim);
   }
-
-
   stopwatch_start(&sw);
   lud_omp(m, matrix_dim);
   stopwatch_stop(&sw);
