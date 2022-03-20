@@ -167,5 +167,6 @@ void lud_omp(float *a, int size)
 }
 #endif
 stopwatch_stop(&sw);
-
+printf("%d,%lu,%lu,%f,%d\n", size, size*(size+1)*sizeof(int), size*size*sizeof(int),\
+            get_interval_by_sec(sw), get_interval_by_usec(sw));
 }
