@@ -127,13 +127,13 @@ main ( int argc, char *argv[] )
   stopwatch_stop(&sw);
   printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
 
-  if (do_verify){
-    printf("After LUD\n");
-    /* print_matrix(m, matrix_dim); */
-    printf(">>>Verify<<<<\n");
-    lud_verify(mm, m, matrix_dim); 
-    free(mm);
-  }
+  // if (do_verify){
+  //   printf("After LUD\n");
+  //   /* print_matrix(m, matrix_dim); */
+  //   printf(">>>Verify<<<<\n");
+  //   lud_verify(mm, m, matrix_dim); 
+  //   free(mm);
+  // }
   
   free(m);
 
