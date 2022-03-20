@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <omp.h>
 
-#include "common.h"
-
 extern int omp_num_threads;
 
 #define BS 16
@@ -45,10 +43,8 @@ void lud_diagonal_omp (float* a, int size, int offset)
 // implements block LU factorization 
 void lud_omp(float *a, int size)
 {
-    printf("called\n");
     int offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter;
-    stopwatch sw;
-    stopwatch_start(&sw);
+
 #ifdef OMP_OFFLOAD
 #pragma omp target teams map(to: size) map(a[0:size*size]) num_teams(NTEAMS)
 #endif
@@ -164,10 +160,8 @@ void lud_omp(float *a, int size)
     }
 
     lud_diagonal_omp(a, size, offset);
-stopwatch_stop(&sw);
-printf("%d,%lu,%lu,%f,%d\n", size, size*(size+1)*sizeof(int), size*size*sizeof(int),\
-            get_interval_by_sec(sw), get_interval_by_usec(sw));
 #ifdef OMP_OFFLOAD
 }
 #endif
+
 }
