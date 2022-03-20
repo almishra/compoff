@@ -114,7 +114,6 @@ main ( int argc, char *argv[] )
   //   /* print_matrix(m, matrix_dim); */
   //   matrix_duplicate(m, &mm, matrix_dim);
   // }
-
   for(;matrix_dim<=1000;){
     ret = create_matrix(&m, matrix_dim);
     if (ret != RET_SUCCESS) {
