@@ -46,7 +46,6 @@ main ( int argc, char *argv[] )
   func_ret_t ret;
   const char *input_file = NULL;
   float *m, *mm;
-  stopwatch sw;
 
 	
   // while ((opt = getopt_long(argc, argv, "::vs:n:i:", 
@@ -116,16 +115,21 @@ main ( int argc, char *argv[] )
   //   matrix_duplicate(m, &mm, matrix_dim);
   // }
 
-  ret = create_matrix(&m, matrix_dim);
-  if (ret != RET_SUCCESS) {
-    m = NULL;
-    fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
-    exit(EXIT_FAILURE);
+  for(;matrix_dim<=1000;){
+    ret = create_matrix(&m, matrix_dim);
+    if (ret != RET_SUCCESS) {
+      m = NULL;
+      fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
+      exit(EXIT_FAILURE);
+    }
+    stopwatch sw;
+    stopwatch_start(&sw);
+    lud_omp(m, matrix_dim);
+    stopwatch_stop(&sw);
+    printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
+    free(m);
+    matrix_dim*=10;
   }
-  stopwatch_start(&sw);
-  lud_omp(m, matrix_dim);
-  stopwatch_stop(&sw);
-  printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
 
   // if (do_verify){
   //   printf("After LUD\n");
@@ -134,8 +138,6 @@ main ( int argc, char *argv[] )
   //   lud_verify(mm, m, matrix_dim); 
   //   free(mm);
   // }
-  
-  free(m);
 
   return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
