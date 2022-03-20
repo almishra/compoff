@@ -47,7 +47,7 @@ main ( int argc, char *argv[] )
   const char *input_file = NULL;
   float *m, *mm;
   
-  printf("matrix_dim,mem_to,mem_from,runtime(s),runtime(us)");
+  printf("matrix_dim,mem_to,mem_from,runtime(s),runtime(us)\n");
   for(;matrix_dim<=1000;){
     ret = create_matrix(&m, matrix_dim);
     if (ret != RET_SUCCESS) {
@@ -55,6 +55,7 @@ main ( int argc, char *argv[] )
       fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
       exit(EXIT_FAILURE);
     }
+    printf("Created Matrix\n");
     lud_omp(m, matrix_dim);
     free(m);
     matrix_dim*=10;
