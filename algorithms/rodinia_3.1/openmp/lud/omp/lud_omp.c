@@ -45,6 +45,7 @@ void lud_diagonal_omp (float* a, int size, int offset)
 // implements block LU factorization 
 void lud_omp(float *a, int size)
 {
+    printf("called\n");
     int offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter;
     stopwatch sw;
     stopwatch_start(&sw);
