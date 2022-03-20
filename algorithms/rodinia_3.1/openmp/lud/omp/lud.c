@@ -49,6 +49,7 @@ main ( int argc, char *argv[] )
   
   printf("matrix_dim,mem_to,mem_from,runtime(s),runtime(us)");
   for(;matrix_dim<=1000;){
+    printf("Coming here\n");
     ret = create_matrix(&m, matrix_dim);
     if (ret != RET_SUCCESS) {
       m = NULL;
