@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <omp.h>
 
-#include "common.h"
+// #include "common.h"
 
 extern int omp_num_threads;
 
@@ -46,8 +46,8 @@ void lud_diagonal_omp (float* a, int size, int offset)
 void lud_omp(float *a, int size)
 {
     int offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter;
-    stopwatch sw;
-    stopwatch_start(&sw);
+    // stopwatch sw;
+    // stopwatch_start(&sw);
 #ifdef OMP_OFFLOAD
 #pragma omp target teams map(to: size) map(a[0:size*size]) num_teams(NTEAMS)
 #endif
@@ -166,9 +166,9 @@ void lud_omp(float *a, int size)
 }
 #endif
 lud_diagonal_omp(a, size, offset);
-stopwatch_stop(&sw);
-int usecs = get_interval_by_usec(&sw);
-double secnds = get_interval_by_sec(&sw);
-printf("%lu,%lu,%d,%f\n",(size*(size+1))*sizeof(int), size*size*sizeof(int), \
-                usecs, secnds);
+// stopwatch_stop(&sw);
+// int usecs = get_interval_by_usec(&sw);
+// double secnds = get_interval_by_sec(&sw);
+// printf("%lu,%lu,%d,%f\n",(size*(size+1))*sizeof(int), size*size*sizeof(int), \
+//                 usecs, secnds);
 }
