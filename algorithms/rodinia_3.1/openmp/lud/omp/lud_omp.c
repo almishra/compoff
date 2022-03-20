@@ -167,4 +167,5 @@ void lud_omp(float *a, int size)
 }
 #endif
 stopwatch_stop(&sw);
+
 }
