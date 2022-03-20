@@ -41,7 +41,7 @@ lud_omp(float *m, int matrix_dim);
 int
 main ( int argc, char *argv[] )
 {
-  int matrix_dim = 100; /* default size */
+  int matrix_dim = 32; /* default size */
   int opt, option_index=0;
   func_ret_t ret;
   const char *input_file = NULL;
@@ -116,23 +116,21 @@ main ( int argc, char *argv[] )
   //   matrix_duplicate(m, &mm, matrix_dim);
   // }
 
-  omp_num_threads = 100;
-  for(;matrix_dim<=1000;){
-    stopwatch_start(&sw);
-    lud_omp(m, matrix_dim);
-    stopwatch_stop(&sw);
-    printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
-    matrix_dim*=10;
-    free(m);
-  }
 
-  // if (do_verify){
-  //   printf("After LUD\n");
-  //   /* print_matrix(m, matrix_dim); */
-  //   printf(">>>Verify<<<<\n");
-  //   lud_verify(mm, m, matrix_dim); 
-  //   free(mm);
-  // }
+  stopwatch_start(&sw);
+  lud_omp(m, matrix_dim);
+  stopwatch_stop(&sw);
+  printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
+
+  if (do_verify){
+    printf("After LUD\n");
+    /* print_matrix(m, matrix_dim); */
+    printf(">>>Verify<<<<\n");
+    lud_verify(mm, m, matrix_dim); 
+    free(mm);
+  }
+  
+  free(m);
 
   return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
