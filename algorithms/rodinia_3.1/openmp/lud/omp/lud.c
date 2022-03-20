@@ -41,7 +41,7 @@ lud_omp(float *m, int matrix_dim);
 int
 main ( int argc, char *argv[] )
 {
-  int matrix_dim = 100; /* default size */
+  int matrix_dim = 32; /* default size */
   int opt, option_index=0;
   func_ret_t ret;
   const char *input_file = NULL;
@@ -49,44 +49,43 @@ main ( int argc, char *argv[] )
   stopwatch sw;
 
 	
-  // while ((opt = getopt_long(argc, argv, "::vs:n:i:", 
-  //                           long_options, &option_index)) != -1 ) {
-  //   switch(opt){
-  //   case 'i':
-  //     input_file = optarg;
-  //     break;
-  //   case 'v':
-  //     do_verify = 1;
-  //     break;
-  //   case 'n':
-  //     omp_num_threads = atoi(optarg);
-  //     break;
-  //   case 's':
-  //     matrix_dim = atoi(optarg);
-  //     printf("Generate input matrix internally, size =%d\n", matrix_dim);
-  //     // fprintf(stderr, "Currently not supported, use -i instead\n");
-  //     // fprintf(stderr, "Usage: %s [-v] [-s matrix_size|-i input_file]\n", argv[0]);
-  //     // exit(EXIT_FAILURE);
-  //     break;
-  //   case '?':
-  //     fprintf(stderr, "invalid option\n");
-  //     break;
-  //   case ':':
-  //     fprintf(stderr, "missing argument\n");
-  //     break;
-  //   default:
-  //     fprintf(stderr, "Usage: %s [-v] [-s matrix_size|-i input_file]\n",
-	//       argv[0]);
-  //     exit(EXIT_FAILURE);
-  //   }
-  // }
+  while ((opt = getopt_long(argc, argv, "::vs:n:i:", 
+                            long_options, &option_index)) != -1 ) {
+    switch(opt){
+    case 'i':
+      input_file = optarg;
+      break;
+    case 'v':
+      do_verify = 1;
+      break;
+    case 'n':
+      omp_num_threads = atoi(optarg);
+      break;
+    case 's':
+      matrix_dim = atoi(optarg);
+      printf("Generate input matrix internally, size =%d\n", matrix_dim);
+      // fprintf(stderr, "Currently not supported, use -i instead\n");
+      // fprintf(stderr, "Usage: %s [-v] [-s matrix_size|-i input_file]\n", argv[0]);
+      // exit(EXIT_FAILURE);
+      break;
+    case '?':
+      fprintf(stderr, "invalid option\n");
+      break;
+    case ':':
+      fprintf(stderr, "missing argument\n");
+      break;
+    default:
+      fprintf(stderr, "Usage: %s [-v] [-s matrix_size|-i input_file]\n",
+	      argv[0]);
+      exit(EXIT_FAILURE);
+    }
+  }
   
-  // if ( (optind < argc) || (optind == 1)) {
-  //   fprintf(stderr, "Usage: %s [-v] [-n no. of threads] [-s matrix_size|-i input_file]\n", argv[0]);
-  //   exit(EXIT_FAILURE);
-  // }
+  if ( (optind < argc) || (optind == 1)) {
+    fprintf(stderr, "Usage: %s [-v] [-n no. of threads] [-s matrix_size|-i input_file]\n", argv[0]);
+    exit(EXIT_FAILURE);
+  }
 
-  omp_num_threads = 100;
   if (input_file) {
     printf("Reading matrix from file %s\n", input_file);
     ret = create_matrix_from_file(&m, input_file, &matrix_dim);
