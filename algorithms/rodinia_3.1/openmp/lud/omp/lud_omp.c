@@ -169,5 +169,5 @@ void lud_omp(float *a, int size)
 }
 #endif
 stopwatch_end(&sw);
-printf("Time consumed is %f", get_interval_by_sec(sw));
+printf("Time consumed is %f", get_interval_by_sec(&sw));
 }
