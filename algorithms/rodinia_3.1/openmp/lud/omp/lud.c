@@ -42,14 +42,14 @@ lud_omp(float *m, int matrix_dim);
 int
 main ( int argc, char *argv[] )
 {
-  int matrix_dim = 32; /* default size */
+  int matrix_dim = 100; /* default size */
   int opt, option_index=0;
   func_ret_t ret;
   const char *input_file = NULL;
   float *m, *mm;
   
-  printf("matrix_dim,mem_to,mem_from,runtime(s),runtime(us)\n");
-  for(;matrix_dim<=1000;){
+  printf("matrix_dim,block_size,mem_to,mem_from,runtime(s),runtime(us)\n");
+  for(;matrix_dim<=10000;){
     ret = create_matrix(&m, matrix_dim);
     if (ret != RET_SUCCESS) {
       m = NULL;
