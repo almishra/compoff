@@ -47,7 +47,7 @@ void lud_diagonal_omp (float* a, int size, int offset)
 void lud_omp(float *a, int size)
 {
     int offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter;
-    clock_t start_t, end_t;
+    struct timeval start_t, end_t;
     gettimeofday(&start_t, NULL);
 #ifdef OMP_OFFLOAD
 #pragma omp target teams map(to: size) map(a[0:size*size]) num_teams(NTEAMS)
@@ -167,7 +167,7 @@ void lud_omp(float *a, int size)
 }
 #endif
 gettimeofday(&end_t, NULL);
-double diff_t = end_t-start_t;
+double diff_t = end_t.tv_usec - start_t.tv_usec;
 printf("Time taken is %f\n", diff_t*1000000);
 // 
 // printf("Time consumed is %f", get_interval_by_sec(&sw));
