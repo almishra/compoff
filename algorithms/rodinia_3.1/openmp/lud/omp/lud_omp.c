@@ -167,6 +167,7 @@ void lud_omp(float *a, int size)
 }
 #endif
 gettimeofday(&stop, NULL);
+printf("took %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec); 
 // 
 // printf("Time consumed is %f", get_interval_by_sec(&sw));
 }
