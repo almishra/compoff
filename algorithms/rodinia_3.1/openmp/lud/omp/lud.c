@@ -38,6 +38,8 @@ static struct option long_options[] = {
 extern void
 lud_omp(float *m, int matrix_dim);
 
+extern void call_hello(void);
+
 int
 main ( int argc, char *argv[] )
 {
@@ -55,7 +57,6 @@ main ( int argc, char *argv[] )
       fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
       exit(EXIT_FAILURE);
     }
-    printf("Created Matrix\n");
     lud_omp(m, matrix_dim);
     free(m);
     matrix_dim*=10;
