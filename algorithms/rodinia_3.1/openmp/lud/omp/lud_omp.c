@@ -12,9 +12,6 @@ extern int omp_num_threads;
 #define AA(_i,_j) a[offset*size+_i*size+_j+offset]
 #define BB(_i,_j) a[_i*size+_j]
 
-void call_hello(void){
-    printf("Hello World\n");
-}
 #ifdef OMP_OFFLOAD
 #pragma omp declare target
 #endif

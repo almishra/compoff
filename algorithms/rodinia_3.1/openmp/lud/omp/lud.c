@@ -38,7 +38,6 @@ static struct option long_options[] = {
 extern void
 lud_omp(float *m, int matrix_dim);
 
-extern void call_hello(void);
 
 int
 main ( int argc, char *argv[] )
