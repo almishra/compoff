@@ -15,6 +15,7 @@ extern int omp_num_threads;
 
 void lud_diagonal_omp (float* a, int size, int offset)
 {
+    printf("Getting called\n");
     int i, j, k;
     for (i = 0; i < BS; i++) {
 
@@ -43,7 +44,6 @@ void lud_diagonal_omp (float* a, int size, int offset)
 // implements block LU factorization 
 void lud_omp(float *a, int size)
 {
-    printf("Getting called\n");
     int offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter;
     stopwatch sw;
     stopwatch_start(&sw);
