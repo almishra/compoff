@@ -48,7 +48,7 @@ main ( int argc, char *argv[] )
   const char *input_file = NULL;
   float *m, *mm;
   
-  printf("matrix_dim,block_size,mem_to,mem_from,runtime(s),runtime(us)\n");
+  //printf("matrix_dim,block_size,mem_to,mem_from,runtime(s),runtime(us)\n");
   for(;matrix_dim<=10000;){
     ret = create_matrix(&m, matrix_dim);
     if (ret != RET_SUCCESS) {
