@@ -168,7 +168,7 @@ void lud_omp(float *a, int size)
 #endif
 time(&end_t);
 double diff_t = difftime(end_t, start_t);
-printf("Time taken is %f", diff_t);
+printf("Time taken is %f\n", diff_t*1000000);
 // 
 // printf("Time consumed is %f", get_interval_by_sec(&sw));
 }
