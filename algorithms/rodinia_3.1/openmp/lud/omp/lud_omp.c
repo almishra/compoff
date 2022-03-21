@@ -165,9 +165,10 @@ void lud_omp(float *a, int size)
     }
 
     lud_diagonal_omp(a, size, offset);
+    stopwatch_end(&sw);
 #ifdef OMP_OFFLOAD
 }
 #endif
-// stopwatch_end(&sw);
+// 
 // printf("Time consumed is %f", get_interval_by_sec(&sw));
 }
