@@ -168,7 +168,7 @@ void lud_omp(float *a, int size)
 #endif
 gettimeofday(&stop, NULL);
 long int elapsedUTime = (stop.tv_usec - start.tv_usec);
-double elapsedSTime = elapsedSTime/1000000;
+double elapsedSTime = (double)elapsedSTime/1000000;
 printf("%d,%lu,%lu,%f,%lu\n", size, (size*size+1)*sizeof(int), \
         size*size*sizeof(int), elapsedSTime, elapsedUTime); 
 // 
