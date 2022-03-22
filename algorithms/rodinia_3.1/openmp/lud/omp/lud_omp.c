@@ -12,7 +12,7 @@ int BS = 16;
 #define BB(_i,_j) a[_i*size+_j]
 
 #ifdef OMP_OFFLOAD
-#pragma omp declare target map(BS)
+#pragma omp declare target 
 #endif
 
 
@@ -44,9 +44,8 @@ void lud_diagonal_omp (float* a, int size, int offset)
 
 
 // implements block LU factorization 
-void lud_omp(float *a, int size, int block_size)
+void lud_omp(float *a, int size)
 {
-    BS = block_size;
     int offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter;
     struct timeval stop, start;
     gettimeofday(&start, NULL);
@@ -170,8 +169,8 @@ void lud_omp(float *a, int size, int block_size)
 gettimeofday(&stop, NULL);
 long int elapsedUTime = (stop.tv_usec - start.tv_usec);
 double elapsedSTime = (double)elapsedUTime/1000000;
-printf("%d,%d,%lu,%lu,%f,%lu\n", size, BS, (size*size+2)*sizeof(int), \
-        (size*size+1)*sizeof(int), elapsedSTime, elapsedUTime); 
+printf("%d,%d,%lu,%lu,%f,%lu\n", size, BS, (size*size+1)*sizeof(int), \
+        (size*size)*sizeof(int), elapsedSTime, elapsedUTime); 
 // 
 // printf("Time consumed is %f", get_interval_by_sec(&sw));
 }
