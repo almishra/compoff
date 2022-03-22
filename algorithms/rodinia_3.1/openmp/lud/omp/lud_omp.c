@@ -5,7 +5,7 @@
 
 extern int omp_num_threads;
 
-#define BS 32
+int BS = 16;
 #define NTEAMS 20
 #define OP 1
 #define AA(_i,_j) a[offset*size+_i*size+_j+offset]
@@ -44,8 +44,9 @@ void lud_diagonal_omp (float* a, int size, int offset)
 
 
 // implements block LU factorization 
-void lud_omp(float *a, int size)
+void lud_omp(float *a, int size, int block_size)
 {
+    BS = block_size;
     int offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter;
     struct timeval stop, start;
     gettimeofday(&start, NULL);

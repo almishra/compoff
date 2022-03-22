@@ -36,7 +36,7 @@ static struct option long_options[] = {
 };
 
 extern void
-lud_omp(float *m, int matrix_dim);
+lud_omp(float *m, int matrix_dim, int blockSize);
 
 
 int
@@ -58,12 +58,19 @@ main ( int argc, char *argv[] )
             matrix_dim = atoi(optarg);
             break;
         default: /* '?' */
-            fprintf(stderr, "Usage: %s [-t nsecs] [-n] name\n",
+            fprintf(stderr, "Usage: %s [-b blockSize] [-m matrixSize] name\n",
                     argv[0]);
             exit(EXIT_FAILURE);
         }
     }
     printf("BlockSize and matrix dim are %d, %d\n", blockSize, matrix_dim);
+    ret = create_matrix(&m, matrix_dim);
+    if (ret != RET_SUCCESS) {
+      m = NULL;
+      fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
+      exit(EXIT_FAILURE);
+    }
+    lud_omp(m, matrix_dim, blockSize);
   //printf("matrix_dim,block_size,mem_to,mem_from,runtime(s),runtime(us)\n");
   // for(;matrix_dim<=10000;){
   //   ret = create_matrix(&m, matrix_dim);
