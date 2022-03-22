@@ -47,19 +47,35 @@ main ( int argc, char *argv[] )
   func_ret_t ret;
   const char *input_file = NULL;
   float *m, *mm;
-  
-  //printf("matrix_dim,block_size,mem_to,mem_from,runtime(s),runtime(us)\n");
-  for(;matrix_dim<=10000;){
-    ret = create_matrix(&m, matrix_dim);
-    if (ret != RET_SUCCESS) {
-      m = NULL;
-      fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
-      exit(EXIT_FAILURE);
+  int flags, tfnd, nsecs;
+
+  while ((opt = getopt(argc, argv, "n:t:")) != -1) {
+        switch (opt) {
+        case 'n':
+            flags = 1;
+            break;
+        case 't':
+            nsecs = atoi(optarg);
+            tfnd = 1;
+            break;
+        default: /* '?' */
+            fprintf(stderr, "Usage: %s [-t nsecs] [-n] name\n",
+                    argv[0]);
+            exit(EXIT_FAILURE);
+        }
     }
-    lud_omp(m, matrix_dim);
-    free(m);
-    matrix_dim*=10;
-  }
+
+  //printf("matrix_dim,block_size,mem_to,mem_from,runtime(s),runtime(us)\n");
+  // for(;matrix_dim<=10000;){
+  //   ret = create_matrix(&m, matrix_dim);
+  //   if (ret != RET_SUCCESS) {
+  //     m = NULL;
+  //     fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
+  //     exit(EXIT_FAILURE);
+  //   }
+  //   lud_omp(m, matrix_dim);
+  //   free(m);
+  // }
 
   return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
