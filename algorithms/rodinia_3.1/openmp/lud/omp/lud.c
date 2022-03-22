@@ -47,16 +47,15 @@ main ( int argc, char *argv[] )
   func_ret_t ret;
   const char *input_file = NULL;
   float *m, *mm;
-  int flags, tfnd, nsecs;
+  int blockSize;
 
-  while ((opt = getopt(argc, argv, "n:t:")) != -1) {
+  while ((opt = getopt(argc, argv, "b:m:")) != -1) {
         switch (opt) {
-        case 'n':
-            flags = 1;
+        case 'b':
+            blockSize = atoi(optarg);
             break;
-        case 't':
-            nsecs = atoi(optarg);
-            tfnd = 1;
+        case 'm':
+            matrix_dim = atoi(optarg);
             break;
         default: /* '?' */
             fprintf(stderr, "Usage: %s [-t nsecs] [-n] name\n",
@@ -64,7 +63,7 @@ main ( int argc, char *argv[] )
             exit(EXIT_FAILURE);
         }
     }
-
+    printf("BlockSize and matrix dim are %d, %d\n", blockSize, matrix_dim);
   //printf("matrix_dim,block_size,mem_to,mem_from,runtime(s),runtime(us)\n");
   // for(;matrix_dim<=10000;){
   //   ret = create_matrix(&m, matrix_dim);
