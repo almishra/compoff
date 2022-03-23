@@ -50,7 +50,7 @@ void lud_omp(float *a, int size)
     struct timeval stop, start;
     gettimeofday(&start, NULL);
 #ifdef OMP_OFFLOAD
-#pragma omp target teams map(to: size) map(a[0:size*size], BS) num_teams(NTEAMS)
+#pragma omp target teams map(to: size) map(a[0:size*size]) num_teams(NTEAMS)
 #endif
 
 #ifdef OMP_OFFLOAD
