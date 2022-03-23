@@ -169,7 +169,7 @@ void lud_omp(float *a, int size)
 gettimeofday(&stop, NULL);
 long int elapsedUTime = (stop.tv_usec - start.tv_usec);
 double elapsedSTime = (double)elapsedUTime/1000000;
-printf("%d,%lu,%lu,%f,%lu\n", size, (size*size+1)*sizeof(int), \
+printf("%d,%d,%lu,%lu,%f,%lu\n", size, BS, (size*size+1)*sizeof(int), \
         (size*size)*sizeof(int), elapsedSTime, elapsedUTime); 
 // 
 // printf("Time consumed is %f", get_interval_by_sec(&sw));
