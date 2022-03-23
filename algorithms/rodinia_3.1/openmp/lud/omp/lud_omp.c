@@ -4,8 +4,9 @@
 #include <sys/time.h>
 
 extern int omp_num_threads;
-
+#ifndef BS
 #define BS 16
+#endif
 #define NTEAMS 20
 #define OP 1
 #define AA(_i,_j) a[offset*size+_i*size+_j+offset]
