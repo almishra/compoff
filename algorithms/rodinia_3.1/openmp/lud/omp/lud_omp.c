@@ -5,7 +5,7 @@
 
 extern int omp_num_threads;
 
-#define BS 16;
+#define BS 16
 #define NTEAMS 20
 #define OP 1
 #define AA(_i,_j) a[offset*size+_i*size+_j+offset]
