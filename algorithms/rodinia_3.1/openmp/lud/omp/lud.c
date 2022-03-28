@@ -24,6 +24,10 @@
 
 #include "common.h"
 
+#ifndef MATRIX_DIM
+#define MATRIX_DIM 100
+#endif
+
 static int do_verify = 0;
 int omp_num_threads = 40;
 
@@ -48,29 +52,14 @@ main ( int argc, char *argv[] )
   const char *input_file = NULL;
   float *m, *mm;
   int blockSize;
-
-  while ((opt = getopt(argc, argv, "b:m:")) != -1) {
-        switch (opt) {
-        case 'b':
-            blockSize = atoi(optarg);
-            break;
-        case 'm':
-            matrix_dim = atoi(optarg);
-            break;
-        default: /* '?' */
-            fprintf(stderr, "Usage: %s [-b blockSize] [-m matrixSize] name\n",
-                    argv[0]);
-            exit(EXIT_FAILURE);
-        }
-    }
     //printf("BlockSize and matrix dim are %d, %d\n", blockSize, matrix_dim);
-    ret = create_matrix(&m, matrix_dim);
+    ret = create_matrix(&m, MATRIX_DIM);
     if (ret != RET_SUCCESS) {
       m = NULL;
       fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
       exit(EXIT_FAILURE);
     }
-    lud_omp(m, matrix_dim);
+    lud_omp(m, MATRIX_DIM);
   //printf("matrix_dim,block_size,mem_to,mem_from,runtime(s),runtime(us)\n");
   // for(;matrix_dim<=10000;){
   //   ret = create_matrix(&m, matrix_dim);

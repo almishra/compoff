@@ -4,9 +4,11 @@
 #include <sys/time.h>
 
 extern int omp_num_threads;
+
 #ifndef BS
 #define BS 16
 #endif
+
 #define NTEAMS 20
 #define OP 1
 #define AA(_i,_j) a[offset*size+_i*size+_j+offset]
@@ -40,7 +42,7 @@ void lud_diagonal_omp (float* a, int size, int offset)
 }
 
 #ifdef OMP_OFFLOAD
-#pragma end declare target
+#pragma omp end declare target
 #endif
 
 
