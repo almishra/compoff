@@ -226,12 +226,14 @@ void BFSGraph( int argc, char** argv)
     } while(stop);
     double end_time = omp_get_wtime();
     #if defined(OMP_GPU_OFFLOAD)
-        double trans_time =  omp_get_wtime();
         unsigned long long sizeTo = 3*no_of_nodes*sizeof(bool);
         sizeTo+=(no_of_nodes*sizeof(Node)+edge_list_size*sizeof(unsigned long long));
         sizeTo+=(no_of_nodes*sizeof(int));
         unsigned long long sizeFrom = (no_of_nodes*sizeof(int));
-        printf("Size to is %llu\n", sizeTo);
+        double timeTaken = end_time-start_time;
+        double timeTakenUs = timeTaken*1000000;
+        printf("%llu,%llu,%llu,%g,%g\n", no_of_nodes, sizeTo, sizeFrom, timeTaken, \
+        timeTakenUs);
         //printf("Transfer time: %g\n", trans_time - start_time);
     #endif
     printf("Total time: %g\n", (end_time - start_time));
