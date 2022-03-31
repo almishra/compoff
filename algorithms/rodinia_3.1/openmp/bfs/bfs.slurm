@@ -10,5 +10,5 @@ cd projects/compoff/algorithms/rodinia_3.1/openmp/bfs
 make gpu
 for i in {1000..100000..1000}
   do
-    ./bfs_gpu $i
+    ./bfs_gpu $i >> /lustre/home/shmmohammed/projects/compoff/benchmarkdata/bfs.csv
  done
