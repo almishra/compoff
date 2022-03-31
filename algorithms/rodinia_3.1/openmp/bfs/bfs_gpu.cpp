@@ -130,7 +130,7 @@ void BFSGraph( int argc, char** argv)
     int* h_cost = (int*) malloc( sizeof(int)*no_of_nodes);
 #endif
     total_size += sizeof(unsigned long long)*edge_list_size + sizeof(int)*no_of_nodes;
-    printf("Total Size: %f GB\n", (float)((total_size/1024.0)/1024.0/1024.0));
+    //printf("Total Size: %f GB\n", (float)((total_size/1024.0)/1024.0/1024.0));
     #ifdef OPEN
     // allocate mem for the result on host side
     for(int i=0;i<no_of_nodes;i++)
@@ -236,7 +236,7 @@ void BFSGraph( int argc, char** argv)
         timeTakenUs);
         //printf("Transfer time: %g\n", trans_time - start_time);
     #endif
-    printf("Total time: %g\n", (end_time - start_time));
+    // printf("Total time: %g\n", (end_time - start_time));
     }
     #endif
 
