@@ -159,10 +159,6 @@ void BFSGraph( int argc, char** argv)
         //#pragma omp target data map(to: no_of_nodes)
     #endif
     {
-#if defined(OMP_GPU_OFFLOAD)
-    double trans_time =  omp_get_wtime();
-    printf("Transfer time: %g\n", trans_time - start_time);
-#endif
     bool stop;
     do 
     {
@@ -229,6 +225,14 @@ void BFSGraph( int argc, char** argv)
         }
     } while(stop);
     double end_time = omp_get_wtime();
+    #if defined(OMP_GPU_OFFLOAD)
+        double trans_time =  omp_get_wtime();
+        unsigned long long sizeTo = 3*no_of_nodes*sizeof(bool);
+        sizeTo+=(no_of_nodes*sizeof(Node)+edge_list_size*sizeof(unsigned long long));
+        sizeTo+=(no_of_nodes*sizeof(int));
+        unsigned long long sizeFrom = (no_of_nodes*sizeof(int));
+        //printf("Transfer time: %g\n", trans_time - start_time);
+    #endif
     printf("Total time: %g\n", (end_time - start_time));
     }
     #endif
