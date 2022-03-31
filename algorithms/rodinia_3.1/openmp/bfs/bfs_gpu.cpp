@@ -231,6 +231,7 @@ void BFSGraph( int argc, char** argv)
         sizeTo+=(no_of_nodes*sizeof(Node)+edge_list_size*sizeof(unsigned long long));
         sizeTo+=(no_of_nodes*sizeof(int));
         unsigned long long sizeFrom = (no_of_nodes*sizeof(int));
+        printf("Size to is %lu\n", sizeTo);
         //printf("Transfer time: %g\n", trans_time - start_time);
     #endif
     printf("Total time: %g\n", (end_time - start_time));
