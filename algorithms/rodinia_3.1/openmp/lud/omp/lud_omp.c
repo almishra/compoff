@@ -18,6 +18,12 @@ extern int omp_num_threads;
 #pragma omp declare target 
 #endif
 
+long get_time()
+{
+  struct timeval  tv;
+  gettimeofday(&tv, NULL); 
+  return (long)(tv.tv_sec * 1000000 + tv.tv_usec);
+}
 
 void lud_diagonal_omp (float* a, int size, int offset)
 {
@@ -50,8 +56,8 @@ void lud_diagonal_omp (float* a, int size, int offset)
 void lud_omp(float *a, int size)
 {
     int offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter;
-    struct timeval stop, start;
-    gettimeofday(&start, NULL);
+    long stop, start;
+    start = get_time();
 #ifdef OMP_OFFLOAD
 #pragma omp target teams map(to: size) map(a[0:size*size]) num_teams(NTEAMS)
 #endif
@@ -169,8 +175,9 @@ void lud_omp(float *a, int size)
 #ifdef OMP_OFFLOAD
 }
 #endif
-gettimeofday(&stop, NULL);
-long int elapsedUTime = (stop.tv_usec - start.tv_usec);
+stop = get_time();
+//
+long int elapsedUTime = (stop-start);
 double elapsedSTime = (double)elapsedUTime/1000000;
 printf("%d,%d,%lu,%lu,%f,%lu\n", size, BS, (size*size+1)*sizeof(int), \
         (size*size)*sizeof(int), elapsedSTime, elapsedUTime); 

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <omp.h>
 #include <time.h>
+#include <sys/time.h>
 
 #define OPEN
 
@@ -22,6 +23,13 @@ struct Node {
 };
 
 void BFSGraph(int argc, char** argv);
+
+long get_time()
+{
+  struct timeval  tv;
+  gettimeofday(&tv, NULL); 
+  return (long)(tv.tv_sec * 1000000 + tv.tv_usec);
+}
 
 void Usage(int argc, char**argv) {
 
@@ -138,7 +146,7 @@ void BFSGraph( int argc, char** argv)
     h_cost[source]=0;
     int counter = 0;
     
-    double start_time = omp_get_wtime();
+    long start_time = get_time();
     #if defined(OMP_GPU_OFFLOAD)
         #pragma omp target data \
             map(to: h_graph_mask[0:no_of_nodes], \
@@ -224,7 +232,7 @@ void BFSGraph( int argc, char** argv)
             }
         }
     } while(stop);
-    double end_time = omp_get_wtime();
+    long end_time = get_time();
     #if defined(OMP_GPU_OFFLOAD)
         unsigned long long sizeTo = 3*no_of_nodes*sizeof(bool);
         sizeTo+=(no_of_nodes*sizeof(Node)+edge_list_size*sizeof(unsigned long long));
