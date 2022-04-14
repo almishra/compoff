@@ -20,12 +20,12 @@ k80: matrix_vector.cpp
 
 
 v100: matrix_vector.cpp
-	for A in 48; do \
-	for B in 48; do \
-	for C in 48; do \
-	for D in 48; do \
-	for E in 8; do \
-	for COUNT in 50; do \
+	for A in 96 64 32; do \                                                       
+	for B in 96 64 32; do \                                                       
+	for C in 96 64 32; do \                                                       
+	for D in 96 64 32; do \                                                       
+	for E in 2 4 8; do \                                                          
+	for COUNT in 10 100 500; do \
 		if [ ! -f output_mv_clang_$${A}_$${B}_$${C}_$${D}_$${E}_$${COUNT}_v100.csv ]; then \
 			num=1; \
 			while [[ $$num -lt 10 ]] ; do \
