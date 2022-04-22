@@ -1,7 +1,7 @@
 CC = clang++
 SRC = pathfinder.cpp
 EXE = pathfinder
-FLAGS = -fopenmp
+FLAGS = -fopenmp -foffload=nvptx-none
 
 release:
 	$(CC) $(SRC) $(FLAGS) -o $(EXE)
