@@ -56,4 +56,3 @@ BPNN *bpnn_read();
 void bpnn_train_kernel(BPNN *net, float *eo, float *eh);
 void load(BPNN *net);
 
-#endif
