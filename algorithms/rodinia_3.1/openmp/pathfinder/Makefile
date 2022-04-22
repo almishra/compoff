@@ -1,7 +1,7 @@
-CC = clang++
+CC = g++
 SRC = pathfinder.cpp
 EXE = pathfinder
-FLAGS = -fopenmp -O3 -L/lustre/projects/compoff-group/opt/llvm/lib -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70 
+FLAGS = -fopenmp -foffload=nvptx-none
 
 release:
 	$(CC) $(SRC) $(FLAGS) -o $(EXE)
