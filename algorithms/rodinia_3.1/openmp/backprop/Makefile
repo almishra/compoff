@@ -83,11 +83,11 @@ backprop_kernel.all: backprop_kernel.c backprop.h
 imagenet.all: imagenet.c backprop.h
 	$(CC) $(ALL_FLAGS) imagenet.c -c -o imagenet.bc
 
-gpu: facetrain.all backprop.all backprop_kernel.all imagenet.all
-	llvm-link facetrain-host-powerpc64le-unknown-linux-gnu.tmp.bc backprop-host-powerpc64le-unknown-linux-gnu.tmp.bc backprop_kernel-host-powerpc64le-unknown-linux-gnu.tmp.bc imagenet-host-powerpc64le-unknown-linux-gnu.tmp.bc -o host.bc
-	llvm-link facetrain-openmp-nvptx64-nvidia-cuda.tmp.bc backprop-openmp-nvptx64-nvidia-cuda.tmp.bc backprop_kernel-openmp-nvptx64-nvidia-cuda.tmp.bc imagenet-openmp-nvptx64-nvidia-cuda.tmp.bc -o dev.bc
-	clang-offload-bundler -type=bc -inputs=host.bc,dev.bc -targets=host-powerpc64le-unknown-linux-gnu,openmp-nvptx64-nvidia-cuda -outputs=/ccs/home/lld/benchmarks/rodinia_3.1/openmp/backprop/main.bc
-	$(CC) $(CC_FLAGS) main.bc -o backprop_gpu -lm 
+# gpu: facetrain.all backprop.all backprop_kernel.all imagenet.all
+# 	llvm-link facetrain-host-powerpc64le-unknown-linux-gnu.tmp.bc backprop-host-powerpc64le-unknown-linux-gnu.tmp.bc backprop_kernel-host-powerpc64le-unknown-linux-gnu.tmp.bc imagenet-host-powerpc64le-unknown-linux-gnu.tmp.bc -o host.bc
+# 	llvm-link facetrain-openmp-nvptx64-nvidia-cuda.tmp.bc backprop-openmp-nvptx64-nvidia-cuda.tmp.bc backprop_kernel-openmp-nvptx64-nvidia-cuda.tmp.bc imagenet-openmp-nvptx64-nvidia-cuda.tmp.bc -o dev.bc
+# 	clang-offload-bundler -type=bc -inputs=host.bc,dev.bc -targets=host-powerpc64le-unknown-linux-gnu,openmp-nvptx64-nvidia-cuda -outputs=/ccs/home/lld/benchmarks/rodinia_3.1/openmp/backprop/main.bc
+# 	$(CC) $(CC_FLAGS) main.bc -o backprop_gpu -lm 
 
 #gpu: host.bc dev.bc
 ##	$(CC) $(CC_FLAGS) host.bc dev.bc -o backprop_gpu -lm
