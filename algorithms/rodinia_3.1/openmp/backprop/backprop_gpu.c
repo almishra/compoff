@@ -216,10 +216,10 @@ void bpnn_free(net)
     free((char *) net->target);
 
 #ifdef OMP_GPU_OFFLOAD
-    free((char *) *net->input_weights);
-    free((char *) *net->input_prev_weights);
-    free((char *) *net->hidden_weights);
-    free((char *) *net->hidden_prev_weights);
+    free((char *) net->input_weights);
+    free((char *) net->input_prev_weights);
+    free((char *) net->hidden_weights);
+    free((char *) net->hidden_prev_weights);
 #else
     for (i = 0; i <= n1; i++) {
         free((char *) net->input_weights[i]);
