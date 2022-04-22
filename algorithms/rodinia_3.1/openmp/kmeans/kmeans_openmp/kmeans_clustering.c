@@ -192,8 +192,8 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
       int tid = omp_get_thread_num();
 #pragma omp for \
       private(i, j, index) \
-      schedule(static) \
       shared(delta) \
+      schedule(static) \
       reduction(+:delta)
       for (i=0; i<npoints; i++) {
         /* find the index of nestest cluster centers */					
