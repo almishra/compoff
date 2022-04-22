@@ -1,5 +1,5 @@
 LOCAL_CC = clang -g -O3 -Wall
-CC = clang -g -O3 -Wall
+CC = clang -g -O3 -Wall -L/lustre/projects/compoff-group/opt/llvm/lib
 CFLAGS = -lm -fopenmp -Wall
 PLUGIN_FLAG = -Xclang -load -Xclang ~/git/unifiedmem/code/llvm-pass/build/uvm/libOMPPass.so
 
@@ -10,7 +10,7 @@ clean :
 	rm -rf *.o nn nn_gpu nn_um
 
 gpu:
-	$(CC) -o nn_gpu nn_omp.cpp $(LDFLAGS) $(CFLAGS) -DOMP_GPU_OFFLOAD -fopenmp-targets=nvptx64-nvidia-cuda
+	$(CC) -o nn_gpu nn_omp.cpp $(LDFLAGS) $(CFLAGS) -DOMP_GPU_OFFLOAD -fopenmp-targets=nvptx64
 
 um:
 	$(CC) -o nn_um nn_omp.cpp $(LDFLAGS) $(CFLAGS) -DOMP_GPU_OFFLOAD_UM -fopenmp-targets=nvptx64-nvidia-cuda $(PLUGIN_FLAG)
