@@ -1,7 +1,7 @@
 #makefile
 
 gpu:
-	clang -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70 ex_particle_OPENMP_seq.c -o particle_filter_gpu -lm 
+	clang -L/lustre/projects/compoff-group/opt/llvm/lib -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70 ex_particle_OPENMP_seq.c -o particle_filter_gpu -lm 
 
 openmp: ex_particle_OPENMP_seq.c
 	gcc -O3 -ffast-math -fopenmp ex_particle_OPENMP_seq.c -o particle_filter -lm 
