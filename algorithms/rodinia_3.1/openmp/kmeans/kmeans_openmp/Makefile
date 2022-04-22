@@ -1,8 +1,8 @@
 # C compiler
 CC = clang
-CC_FLAGS = -g -fopenmp -O2
-PLUGIN_FLAG = -Xclang -load -Xclang ~/git/unifiedmem/code/llvm-pass/build/uvm/libOMPPass.so
-GPU_FLAGS_UM = -DOMP_GPU_OFFLOAD_UM -fopenmp-targets=nvptx64-nvidia-cuda
+CC_FLAGS = -g -fopenmp -O2 -L/lustre/projects/compoff-group/opt/llvm/lib
+#PLUGIN_FLAG = -Xclang -load -Xclang ~/git/unifiedmem/code/llvm-pass/build/uvm/libOMPPass.so
+GPU_FLAGS_UM = -DOMP_GPU_OFFLOAD -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 
 all: kmeans um
 
@@ -31,7 +31,7 @@ kmeans_clustering.o: kmeans_clustering.c kmeans.h
 	$(CC) $(CC_FLAGS) kmeans_clustering.c -c
 
 kmeans_clustering_um.o: kmeans_clustering.c kmeans.h
-	$(CC) $(CC_FLAGS) $(GPU_FLAGS_UM) kmeans_clustering.c -c -o kmeans_clustering_um.o $(PLUGIN_FLAG)
+	$(CC) $(CC_FLAGS) $(GPU_FLAGS_UM) kmeans_clustering.c -c -o kmeans_clustering_um.o
 
 clean:
 	rm -f *.o *~ kmeans kmeans_gpu kmeans_um
