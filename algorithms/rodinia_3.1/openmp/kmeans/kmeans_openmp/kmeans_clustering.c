@@ -192,7 +192,6 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
       int tid = omp_get_thread_num();
 #pragma omp for \
       private(i, j, index) \
-      firstprivate(npoints, nfeatures) \
       schedule(static) \
       reduction(+:delta)
       for (i=0; i<npoints; i++) {
