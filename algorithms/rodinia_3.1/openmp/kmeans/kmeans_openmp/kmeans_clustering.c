@@ -193,6 +193,7 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
 #pragma omp for \
       private(i, j, index) \
       schedule(static) \
+      shared(delta) \
       reduction(+:delta)
       for (i=0; i<npoints; i++) {
         /* find the index of nestest cluster centers */					
