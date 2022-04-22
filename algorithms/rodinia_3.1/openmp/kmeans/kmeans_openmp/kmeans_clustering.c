@@ -190,7 +190,7 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
     delta = 0.0;
     {
       int tid = omp_get_thread_num();
-#pragma omp for \
+#pragma omp parallel for \
       private(i, j, index) \
       shared(delta) \
       schedule(static) \
