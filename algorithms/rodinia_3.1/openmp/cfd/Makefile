@@ -1,8 +1,8 @@
 CC = clang
 CXX = clang++
-CC_FLAGS = -g -fopenmp -O2 -fmodules -L/lustre/projects/compoff-group/opt/llvm/lib
+CC_FLAGS = -g -fopenmp -O2 -fmodules -L/home/shmmohammed/projects/cost-model/opt/llvm/lib
 OFFLOAD_CC_FLAGS = -DOMP_OFFLOAD -offload-option,mic,compiler,"-no-opt-prefetch"
-GPU_FLAGS = -DOMP_GPU_OFFLOAD -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
+GPU_FLAGS = -DOMP_GPU_OFFLOAD -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_75
 #UM_FLAGS = -DOMP_GPU_OFFLOAD_UM -fopenmp-targets=nvptx64-nvidia-cuda -I/sw/summit/cuda/9.0.184/include -lcudart
 UM_FLAGS = -DOMP_GPU_OFFLOAD_UM -fopenmp-targets=nvptx64-nvidia-cuda -I/sw/summitdev/cuda/9.0.69/include -lcudart
 PLUGIN_FLAG = -Xclang -load -Xclang ~/git/unifiedmem/code/llvm-pass/build/uvm/libOMPPass.so
