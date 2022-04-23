@@ -20,7 +20,7 @@ um: main_um.o
 	clang	-O2 main_um.o -lm -fopenmp -o srad_um -fopenmp-targets=nvptx64-nvidia-cuda
 
 gpu: main_gpu.o
-	clang	-L/lustre/projects/compoff-group/opt/llvm/lib main_gpu.o -lm -fopenmp -o srad_gpu -fopenmp-targets=nvptx64
+	clang	-L/home/shmmohammed/projects/cost-model/opt/llvm/lib main_gpu.o -lm -fopenmp -o srad_gpu -fopenmp-targets=nvptx64
 
 # compile main function file into object (binary)
 main.o: 	main.c resize.c define.c graphics.c
