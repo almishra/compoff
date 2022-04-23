@@ -3,7 +3,7 @@ CC = clang
 CXX = clang++
 ICC = clang
 #CC_FLAGS = -fopenmp -O3 -I/usr/local/cuda-9.0/include -lcudart
-CC_FLAGS = -fopenmp -O3 -L$CLANG_LIB
+CC_FLAGS = -fopenmp -O3 -L/home/shmmohammed/projects/cost-model/opt/llvm/lib
 GPU_FLAGS = -DOMP_GPU_OFFLOAD -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70 
 UM_FLAGS = -DOMP_GPU_OFFLOAD_UM -fopenmp-targets=nvptx64
 
