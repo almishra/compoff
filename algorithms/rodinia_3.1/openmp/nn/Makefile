@@ -1,5 +1,5 @@
 LOCAL_CC = clang -g -O3 -Wall
-CC = clang -g -O3 -Wall -L/lustre/projects/compoff-group/opt/llvm/lib 
+CC = clang -g -O3 -Wall -L/home/shmmohammed/projects/cost-model/opt/llvm/lib
 CFLAGS = -lm -fopenmp -Wall -lstdc++
 PLUGIN_FLAG = -Xclang -load -Xclang ~/git/unifiedmem/code/llvm-pass/build/uvm/libOMPPass.so
 
