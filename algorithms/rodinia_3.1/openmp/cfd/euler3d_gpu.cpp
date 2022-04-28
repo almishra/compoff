@@ -6,11 +6,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#ifdef OMP_GPU_OFFLOAD_UM
-//#define CUDA_UM
-#define MAP_ALL
-#include <cuda_runtime_api.h>
-#endif
 
 #if defined(OMP_GPU_OFFLOAD) || defined(OMP_GPU_OFFLOAD_UM)
 #pragma omp declare target
@@ -78,13 +73,6 @@ template <typename T> void copy(T* dst, T* src, unsigned long long N)
 {
     #ifdef OMP_GPU_OFFLOAD
     #pragma omp target teams distribute parallel for default(shared) schedule(static)
-    #elif defined(OMP_GPU_OFFLOAD_UM) && defined(MAP_ALL)
-    #pragma omp target teams distribute parallel for
-    #elif defined(OMP_GPU_OFFLOAD_UM)
-    #pragma omp target teams distribute parallel for \
-                is_device_ptr(dst), is_device_ptr(src) map(to: N)
-    #else
-    #pragma omp parallel for default(shared) schedule(static)
     #endif
     for(unsigned long long i = 0; i < N; i++)
     {
@@ -181,15 +169,6 @@ void compute_step_factor(int nelr, float* __restrict variables, float* areas, fl
 {
     #ifdef OMP_GPU_OFFLOAD
     #pragma omp target teams distribute parallel for default(shared) schedule(auto)
-    #elif defined(OMP_GPU_OFFLOAD_UM) && defined(MAP_ALL)
-    #pragma omp target teams distribute parallel for
-    #elif defined(OMP_GPU_OFFLOAD_UM)
-    #pragma omp target teams distribute parallel for default(shared) schedule(auto) \
-                is_device_ptr(areas) \
-                is_device_ptr(step_factors) \
-                is_device_ptr(variables)
-    #else
-    #pragma omp parallel for default(shared) schedule(auto)
     #endif
     for(int blk = 0; blk < nelr/block_length; ++blk)
     {
@@ -389,14 +368,6 @@ void time_step(int j, int nelr, float* old_variables, float* variables, float* s
 {
     #ifdef OMP_GPU_OFFLOAD
     #pragma omp target teams distribute parallel for default(shared) schedule(auto)
-    #elif defined(OMP_GPU_OFFLOAD_UM) && defined(MAP_ALL)
-    #pragma omp target teams distribute parallel for
-    #elif defined(OMP_GPU_OFFLOAD_UM)
-    #pragma omp target teams distribute parallel for default(shared) schedule(auto) \
-                is_device_ptr(old_variables) is_device_ptr(variables) \
-                is_device_ptr(step_factors) is_device_ptr(fluxes)
-    #else
-    #pragma omp parallel for  default(shared) schedule(auto)
     #endif
     for(int blk = 0; blk < nelr/block_length; ++blk)
     {
@@ -575,7 +546,6 @@ int main(int argc, char** argv)
 
     // these need to be computed the first time in order to compute time step
     //std::cout << "Starting..." << std::endl;
-#ifdef _OPENMP
     unsigned long total_size = sizeof(nelr) 
             + sizeof(float)*nelr*NNB        // area
             + sizeof(float)*nelr            // step_factors
@@ -603,22 +573,7 @@ int main(int argc, char** argv)
                     ff_flux_contribution_momentum_z, \
                     ff_flux_contribution_density_energy) \
                 map(tofrom: variables[0:(nelr*NVAR)])
-    #elif defined(OMP_GPU_OFFLOAD_UM) && defined(MAP_ALL)
-    #pragma omp target data map(alloc: old_variables[0:(nelr*NVAR)]) \
-                map(to: areas[0:nelr], step_factors[0:nelr], \
-                    elements_surrounding_elements[0:(nelr*NNB)], \
-                    normals[0:(NDIM*NNB*nelr)], \
-                    fluxes[0:(nelr*NVAR)], \
-                    ff_variable[0:NVAR], ff_flux_contribution_momentum_x, \
-                    ff_flux_contribution_momentum_y, \
-                    ff_flux_contribution_momentum_z, \
-                    ff_flux_contribution_density_energy) \
-                map(tofrom: variables[0:(nelr*NVAR)])
-    #elif defined(OMP_GPU_OFFLOAD_UM)
-    #pragma omp target data map(to: nelr, ff_flux_contribution_momentum_x, ff_flux_contribution_momentum_y, ff_flux_contribution_momentum_z, \
-                ff_flux_contribution_density_energy)
     #endif
-#endif
     // Begin iterations
     for(int i = 0; i < iterations; i++)
     {
@@ -634,11 +589,10 @@ int main(int argc, char** argv)
         }
     }
 
-#ifdef _OPENMP
     double end = omp_get_wtime();
     std::cout  << "Compute time: " << (end-start) << std::endl;
     //std::cout << (end-start) << std::endl;
-#endif
+
 
 
 //    std::cout << "Saving solution..." << std::endl;
