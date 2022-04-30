@@ -1,7 +1,7 @@
 # C compiler
 CC = clang++
 ICC = icc
-CC_FLAGS = -g -fopenmp -O3  -L/lustre/projects/compoff-group/opt/llvm/lib
+CC_FLAGS = -g -fopenmp -O3  -L${CLANG_LIB}
 OFFLOAD_CC_FLAGS = -offload-option,mic,compiler,"-no-opt-prefetch"
 PLUGIN_FLAG = -Xclang -load -Xclang ~/git/unifiedmem/code/llvm-pass/build/uvm/libOMPPass.so
 
