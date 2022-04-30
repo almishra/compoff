@@ -58,14 +58,7 @@ inline void single_iteration_gpu(FLOAT *result, FLOAT *temp, FLOAT *power, unsig
     unsigned long long chunk;
     unsigned long long num_chunk = row*col;
 
-#if defined(OMP_GPU_OFFLOAD)
     #pragma omp target teams distribute parallel for private(chunk, r, c, delta) firstprivate(row, col, num_chunk)
-#elif defined(OPEN)
-    #ifndef __MIC__
-	omp_set_num_threads(num_omp_threads);
-    #endif
-    #pragma omp parallel for shared(power, temp, result) private(chunk, r, c, delta) firstprivate(row, col, num_chunk) schedule(static)
-#endif
     for ( chunk = 0; chunk < num_chunk; ++chunk )
     {
         r = chunk/col;
@@ -144,14 +137,8 @@ inline void single_iteration_gpu2(FLOAT *result, FLOAT *temp, FLOAT *power, unsi
     unsigned long long chunk;
     unsigned long long num_chunk = row*col;
 
-#if defined(OMP_GPU_OFFLOAD)
     #pragma omp target teams distribute parallel for private(chunk, r, c, delta) firstprivate(row, col, num_chunk)
-#elif defined(OPEN)
-    #ifndef __MIC__
-	omp_set_num_threads(num_omp_threads);
-    #endif
-    #pragma omp parallel for shared(power, temp, result) private(chunk, r, c, delta) firstprivate(row, col, num_chunk) schedule(static)
-#endif
+
     for ( unsigned long long chunk = 0; chunk < row*col; ++chunk )
     {
         r = chunk/col;
@@ -256,22 +243,12 @@ void compute_tran_temp(FLOAT *result, int num_iterations, FLOAT *temp, FLOAT *po
 	#endif
 
         unsigned long long array_size = row*col;
-#if defined(OMP_GPU_OFFLOAD)
 #pragma omp target data \
         map(temp[0:array_size]) \
         map(to: power[0:array_size], row, col, Cap_1, Rx_1, Ry_1, Rz_1) \
         map(from: result[0:array_size])
-#elif defined(OMP_OFFLOAD)
-#pragma omp target \
-        map(temp[0:array_size]) \
-        map(to: power[0:array_size], row, col, Cap_1, Rx_1, Ry_1, Rz_1) \
-        map( result[0:array_size])
-#endif
         {
-#if !defined(OMP_GPU_OFFLOAD)
-            FLOAT* r = result;
-            FLOAT* t = temp;
-#endif
+
 #if defined(OMP_GPU_OFFLOAD)
             for (int i = 0; i < num_iterations; i += 2)
             {
