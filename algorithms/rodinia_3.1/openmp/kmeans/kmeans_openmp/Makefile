@@ -1,6 +1,6 @@
 # C compiler
 CC = clang
-CC_FLAGS = -g -fopenmp -O2 -L/lustre/projects/compoff-group/opt/llvm/lib
+CC_FLAGS = -g -fopenmp -O2 -L${CLANG_LIB}
 #PLUGIN_FLAG = -Xclang -load -Xclang ~/git/unifiedmem/code/llvm-pass/build/uvm/libOMPPass.so
 GPU_FLAGS_UM = -DOMP_GPU_OFFLOAD -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 
