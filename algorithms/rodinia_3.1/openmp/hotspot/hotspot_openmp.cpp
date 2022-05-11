@@ -399,7 +399,7 @@ int main(int argc, char **argv)
     long long end_time = get_time();
 
     //printf("Ending simulation\n");
-    printf("%f, %lu\n", ((float) (end_time - start_time)) / (1000*1000), end_time - start_time);
+    printf("%f,%lu\n", ((float) (end_time - start_time)) / (1000*1000), end_time - start_time);
 
     //writeoutput((1&sim_time) ? result : temp, grid_rows, grid_cols, ofile);
 
