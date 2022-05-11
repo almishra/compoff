@@ -361,7 +361,7 @@ int main(int argc, char **argv)
 		(num_omp_threads = atoi(argv[4])) <= 0
 		)
 		usage(argc, argv);
-
+    printf("%lu,%lu,%d,%d,",grid_rows, grid_cols, sim_time, num_omp_threads);
     assert(num_omp_threads > 0);
     unsigned long long input_time = num_omp_threads;
 	/* allocate memory for the temperature and power arrays	*/
@@ -390,7 +390,7 @@ int main(int argc, char **argv)
 
 	//printf("Start computing the transient temperature\n");
     unsigned long long total_size = 3 * sizeof(FLOAT) * grid_rows * grid_cols;
-    printf("Size: %f GB\n", ((double)total_size) / (1024*1024*1024));
+    printf("%lu,%lu", total_size, total_size);
 	
     long long start_time = get_time();
 
@@ -399,7 +399,7 @@ int main(int argc, char **argv)
     long long end_time = get_time();
 
     //printf("Ending simulation\n");
-    printf("Total time: %f seconds\n", ((float) (end_time - start_time)) / (1000*1000));
+    printf("%f, %lu", ((float) (end_time - start_time)) / (1000*1000), end_time - start_time);
 
     //writeoutput((1&sim_time) ? result : temp, grid_rows, grid_cols, ofile);
 
