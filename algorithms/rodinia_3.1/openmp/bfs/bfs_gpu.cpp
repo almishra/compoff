@@ -244,7 +244,7 @@ void BFSGraph( int argc, char** argv)
         timeTakenUs);
         //printf("Transfer time: %g\n", trans_time - start_time);
     #endif
-    // printf("Total time: %g\n", (end_time - start_time));
+    printf("Total time: %g\n", (end_time - start_time));
     }
     #endif
 
