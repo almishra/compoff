@@ -390,7 +390,7 @@ int main(int argc, char **argv)
 
 	//printf("Start computing the transient temperature\n");
     unsigned long long total_size = 3 * sizeof(FLOAT) * grid_rows * grid_cols;
-    printf("%lu,%lu", total_size, total_size);
+    printf("%lu,%lu,", total_size, total_size);
 	
     long long start_time = get_time();
 
