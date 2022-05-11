@@ -10,7 +10,7 @@ UM_FLAGS = -DOMP_GPU_OFFLOAD_UM -fopenmp-targets=nvptx64
 all: bfs bfs_offload gpu um
 
 bfs: bfs.cpp 
-	$(CC) $(CC_FLAGS) bfs_gpu.cpp -o bfs 
+	$(CC) $(CC_FLAGS) -DOPEN bfs_gpu.cpp -o bfs 
 
 bfs_offload: bfs.cpp
 	$(ICC) $(CC_FLAGS) -DOMP_OFFLOAD bfs.cpp -o bfs_offload
