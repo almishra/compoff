@@ -53,24 +53,24 @@ main ( int argc, char *argv[] )
   float *m, *mm;
   int blockSize;
     //printf("BlockSize and matrix dim are %d, %d\n", blockSize, matrix_dim);
-    // ret = create_matrix(&m, MATRIX_DIM);
-    // if (ret != RET_SUCCESS) {
-    //   m = NULL;
-    //   fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
-    //   exit(EXIT_FAILURE);
-    // }
-    // lud_omp(m, MATRIX_DIM);
-  //printf("matrix_dim,block_size,mem_to,mem_from,runtime(s),runtime(us)\n");
-  for(;matrix_dim<=10000;){
-    ret = create_matrix(&m, matrix_dim);
+    ret = create_matrix(&m, MATRIX_DIM);
     if (ret != RET_SUCCESS) {
       m = NULL;
       fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
       exit(EXIT_FAILURE);
     }
-    lud_omp(m, matrix_dim);
-    free(m);
-  }
+    lud_omp(m, MATRIX_DIM);
+  //printf("matrix_dim,block_size,mem_to,mem_from,runtime(s),runtime(us)\n");
+  // for(;matrix_dim<=10000;){
+  //   ret = create_matrix(&m, matrix_dim);
+  //   if (ret != RET_SUCCESS) {
+  //     m = NULL;
+  //     fprintf(stderr, "error create matrix internally size=%d\n", matrix_dim);
+  //     exit(EXIT_FAILURE);
+  //   }
+  //   lud_omp(m, matrix_dim);
+  //   free(m);
+  // }
 
   return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
