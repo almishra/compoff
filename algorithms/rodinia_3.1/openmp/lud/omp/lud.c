@@ -70,7 +70,7 @@ main ( int argc, char *argv[] )
     }
     lud_omp(m, matrix_dim);
     free(m);
-  // }
+  }
 
   return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
