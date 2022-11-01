@@ -235,7 +235,7 @@ def init_weights(m):
 mod.apply(init_weights)
 
 #print(mod)
-
+torch.autograd.set_detect_anomaly(True)
 criterion = nn.MSELoss(reduction='mean')
 criterion2 = nn.L1Loss(reduction='mean')
 criterion3 = nn.L1Loss(reduction='sum')
@@ -333,10 +333,6 @@ for e in range(num_epochs):
     #    best_model=copy.deepcopy(mod)
     
     #lr_scheduler.step()
-
-## save trained model
-torch.save(mod.state_dict(), 'trained_model.pt')
-
 
 best_model=copy.deepcopy(mod)
 
