@@ -19,7 +19,7 @@ from deepres import DeepRes, Block
 from torchlars import LARS
 from pytorch_optimizer import LARS
 import argparse
-
+from pickle import dump
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--bracket', default="A", choices=["A", "B", "C", "neither"], \
@@ -239,7 +239,7 @@ mod.apply(init_weights)
 criterion = nn.MSELoss(reduction='mean')
 criterion2 = nn.L1Loss(reduction='mean')
 criterion3 = nn.L1Loss(reduction='sum')
-num_epochs=250
+num_epochs=2
 alpha=0.6
 lam=1
 #opt = torch.optim.Adam(mod.parameters(), lr=1e-2, weight_decay=1e-4)
@@ -337,6 +337,8 @@ for e in range(num_epochs):
 ## save trained model
 torch.save(mod.state_dict(), 'trained_model.pt')
 
+## save scaler object
+dump(total_sets.return_scaler_obj(), open('std_scaler.pkl', 'wb'))
 
 best_model=copy.deepcopy(mod)
 
